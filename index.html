@@ -676,15 +676,14 @@
         window.onload = () => {
             fetchDublinWeather();
             calculateLiveDublinTides();
+            
+            // Hardcoded Calendar Sync (Automatically attempts sync on boot)
+            localStorage.setItem('gas_calendar_url', 'https://script.google.com/macros/s/AKfycbwa8Qmzkep4uFkyHJ8BhOa8JfnK2M9BCMA1olk_zAxICokkYDXr0gefUFFpHBF0Q5pzJg/exec');
             syncCalendar();
+            
             fetchLiveNews();
             fetchLiveYouTubeFeeds();
             fetchLiveThreads();
-            
-            const savedUrl = localStorage.getItem('gas_calendar_url');
-            if (savedUrl) {
-                document.getElementById('gcal-url-input').value = savedUrl;
-            }
             
             lucide.createIcons();
         };
