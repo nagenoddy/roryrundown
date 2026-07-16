@@ -4,128 +4,391 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Daily Rundown</title>
-    <!-- Branding & PWA Meta -->
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='40' fill='%238b5cf6'/><path d='M20 70 Q 50 30 80 70' fill='none' stroke='white' stroke-width='6'/></svg>">
-    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='40' fill='%238b5cf6'/><path d='M20 70 Q 50 30 80 70' fill='none' stroke='white' stroke-width='6'/></svg>">
+    
+    <!-- "Rise" Branding & PWA Meta (Sun over Horizon) -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%2318181b'/><circle cx='65' cy='40' r='18' fill='%23f59e0b'/><rect x='22' y='35' width='46' height='50' rx='8' fill='%238b5cf6'/><path d='M32 50 H 58 M32 62 H 58 M32 74 H 46' stroke='%23ffffff' stroke-width='5' stroke-linecap='round'/></svg>">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%2318181b'/><circle cx='65' cy='40' r='18' fill='%23f59e0b'/><rect x='22' y='35' width='46' height='50' rx='8' fill='%238b5cf6'/><path d='M32 50 H 58 M32 62 H 58 M32 74 H 46' stroke='%23ffffff' stroke-width='5' stroke-linecap='round'/></svg>">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
+    
     <style>
-        body { background: #0c0c0e; color: #f3f4f6; font-family: 'Inter', sans-serif; padding-bottom: 80px; }
-        .logo-rise { fill: #8b5cf6; }
+        body { background: #0c0c0e; color: #f3f4f6; font-family: 'Inter', sans-serif; padding-bottom: 90px; }
+        
+        /* Tab Visibility */
         .tab-content { display: none; }
-        .tab-content.active { display: block; animation: fadeIn 0.3s ease; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        .scrollable-feed { max-height: 500px; overflow-y: auto; }
+        .tab-content.active { display: block; animation: fadeIn 0.3s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        
+        /* Scrollable Feeds */
+        .scrollable-feed { max-height: calc(100vh - 220px); overflow-y: auto; padding-bottom: 20px; }
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #374151; border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 4px; }
+        
+        /* 2-Line Summary Truncation */
+        .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        
+        /* Glassmorphism Nav */
+        .glass-nav { background: rgba(9, 9, 11, 0.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
     </style>
 </head>
 <body class="max-w-md mx-auto">
 
     <!-- Header -->
-    <header class="p-6 flex items-center justify-between sticky top-0 bg-[#0c0c0e]/90 backdrop-blur z-50">
-        <div class="flex items-center gap-3">
-            <svg width="40" height="40" viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="#8b5cf6"/><path d="M20 70 Q 50 30 80 70" fill="none" stroke="white" stroke-width="6"/></svg>
+    <header class="px-6 py-5 flex items-center justify-between sticky top-0 bg-[#0c0c0e]/95 backdrop-blur z-50 border-b border-zinc-900/50">
+        <div class="flex items-center gap-4">
+            <!-- New Daily Rundown Logo SVG (Sun & Document) -->
+            <svg width="42" height="42" viewBox="0 0 100 100" class="drop-shadow-lg shrink-0" xmlns="http://www.w3.org/2000/svg">
+                <rect width="100" height="100" rx="22" fill="#18181b"/>
+                <!-- Sun -->
+                <circle cx="65" cy="40" r="18" fill="#f59e0b"/>
+                <!-- Briefing Document -->
+                <rect x="22" y="35" width="46" height="50" rx="8" fill="#8b5cf6"/>
+                <!-- Text/List Lines -->
+                <path d="M32 50 H 58 M32 62 H 58 M32 74 H 46" stroke="#ffffff" stroke-width="5" stroke-linecap="round"/>
+            </svg>
             <div>
-                <h1 class="text-xl font-bold">Rory's Rundown</h1>
-                <p id="date" class="text-xs text-zinc-500">Loading...</p>
+                <h1 class="text-xl font-bold tracking-tight text-zinc-100">Daily Rundown</h1>
+                <p id="date-display" class="text-xs text-zinc-400 font-medium tracking-wide uppercase mt-0.5">Loading...</p>
             </div>
         </div>
     </header>
 
-    <!-- Content -->
-    <main class="px-6 space-y-6">
-        <!-- Environment -->
+    <!-- Content Area -->
+    <main class="px-5 mt-6">
+        
+        <!-- TAB 1: Environment -->
         <section id="tab-env" class="tab-content active">
-            <div class="bg-zinc-900 rounded-2xl p-5 border border-zinc-800">
-                <h2 class="text-sm font-semibold text-zinc-400 mb-4 flex items-center gap-2"><i data-lucide="sun"></i> Dublin Overview</h2>
-                <div id="weather-summary" class="text-sm leading-relaxed mb-4 text-zinc-300">Analyzing today's weather patterns...</div>
+            <!-- Weather Block -->
+            <div class="bg-zinc-900/80 rounded-2xl p-5 border border-zinc-800/80 shadow-lg mb-5">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-sm font-semibold text-zinc-300 flex items-center gap-2"><i data-lucide="cloud-sun" class="w-4 h-4 text-violet-400"></i> Dublin Weather</h2>
+                    <span id="weather-temp" class="text-xl font-bold text-zinc-100">--°</span>
+                </div>
+                
+                <div id="weather-summary" class="text-sm leading-relaxed mb-5 text-zinc-400">
+                    Fetching latest meteorological data...
+                </div>
+                
                 <div class="grid grid-cols-2 gap-3">
-                    <div class="bg-zinc-800 p-3 rounded-xl text-center"><span class="text-[10px] text-zinc-500 uppercase">High</span><div class="font-bold">21°C</div></div>
-                    <div class="bg-zinc-800 p-3 rounded-xl text-center"><span class="text-[10px] text-zinc-500 uppercase">Low</span><div class="font-bold">12°C</div></div>
+                    <div class="bg-zinc-950/50 p-3 rounded-xl flex items-center gap-3 border border-zinc-800/50">
+                        <i data-lucide="thermometer-sun" class="w-5 h-5 text-amber-500"></i>
+                        <div><span class="block text-[10px] text-zinc-500 uppercase tracking-wider">High</span><div id="weather-high" class="font-bold text-sm text-zinc-200">--°C</div></div>
+                    </div>
+                    <div class="bg-zinc-950/50 p-3 rounded-xl flex items-center gap-3 border border-zinc-800/50">
+                        <i data-lucide="thermometer-snowflake" class="w-5 h-5 text-blue-400"></i>
+                        <div><span class="block text-[10px] text-zinc-500 uppercase tracking-wider">Low</span><div id="weather-low" class="font-bold text-sm text-zinc-200">--°C</div></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tide Block -->
+            <div class="bg-zinc-900/80 rounded-2xl p-5 border border-zinc-800/80 shadow-lg">
+                <h2 class="text-sm font-semibold text-zinc-300 flex items-center gap-2 mb-4"><i data-lucide="waves" class="w-4 h-4 text-blue-400"></i> Dublin Bay Tides</h2>
+                <div class="relative w-full h-32 bg-zinc-950/50 rounded-xl overflow-hidden border border-zinc-800/50">
+                    <canvas id="tide-canvas" class="absolute top-0 left-0 w-full h-full"></canvas>
+                </div>
+                <p class="text-xs text-zinc-500 text-center mt-3">Live algorithmic tide estimation</p>
+            </div>
+        </section>
+
+        <!-- TAB 2: Schedule -->
+        <section id="tab-schedule" class="tab-content">
+            <div class="flex items-center justify-between mb-4 px-1">
+                <h2 class="text-sm font-semibold text-zinc-300 flex items-center gap-2"><i data-lucide="calendar" class="w-4 h-4 text-violet-400"></i> Today's Agenda</h2>
+            </div>
+            
+            <div class="space-y-3 scrollable-feed custom-scrollbar" id="schedule-feed">
+                <div class="text-center py-10">
+                    <i data-lucide="loader-2" class="w-6 h-6 animate-spin text-zinc-600 mx-auto mb-3"></i>
+                    <p class="text-xs text-zinc-500">Syncing with Google Calendar...</p>
                 </div>
             </div>
         </section>
 
-        <!-- News (Expanded) -->
+        <!-- TAB 3: News -->
         <section id="tab-news" class="tab-content">
-            <div class="space-y-4 scrollable-feed custom-scrollbar" id="news-feed">
+            <div class="flex items-center justify-between mb-4 px-1">
+                <h2 class="text-sm font-semibold text-zinc-300 flex items-center gap-2"><i data-lucide="newspaper" class="w-4 h-4 text-violet-400"></i> Top Stories</h2>
+            </div>
+            <div class="space-y-4 scrollable-feed custom-scrollbar pb-10" id="news-feed">
                 <!-- Populated by JS -->
             </div>
         </section>
 
-        <!-- Watch (Expanded) -->
+        <!-- TAB 4: Watch -->
         <section id="tab-watch" class="tab-content">
-            <div class="space-y-6 scrollable-feed custom-scrollbar" id="watch-feed">
+            <div class="flex items-center justify-between mb-4 px-1">
+                <h2 class="text-sm font-semibold text-zinc-300 flex items-center gap-2"><i data-lucide="play-square" class="w-4 h-4 text-violet-400"></i> Late Night & Satire</h2>
+            </div>
+            <div class="space-y-5 scrollable-feed custom-scrollbar pb-10" id="watch-feed">
                 <!-- Populated by JS -->
             </div>
         </section>
     </main>
 
-    <!-- Nav -->
-    <nav class="fixed bottom-0 w-full max-w-md bg-zinc-950/95 border-t border-zinc-800 p-4 flex justify-between">
-        <button onclick="switchTab('env', this)" class="nav-btn flex flex-col items-center gap-1 text-violet-500"><i data-lucide="sun"></i><span class="text-[10px]">Env</span></button>
-        <button onclick="switchTab('news', this)" class="nav-btn flex flex-col items-center gap-1 text-zinc-500"><i data-lucide="newspaper"></i><span class="text-[10px]">News</span></button>
-        <button onclick="switchTab('watch', this)" class="nav-btn flex flex-col items-center gap-1 text-zinc-500"><i data-lucide="play-circle"></i><span class="text-[10px]">Watch</span></button>
+    <!-- Bottom Nav -->
+    <nav class="fixed bottom-0 w-full max-w-md glass-nav border-t border-zinc-800/80 px-6 py-4 flex justify-between items-center z-50">
+        <button onclick="switchTab('env', this)" class="nav-btn flex flex-col items-center gap-1.5 text-violet-400 transition-colors">
+            <i data-lucide="cloud-sun" class="w-5 h-5"></i><span class="text-[10px] font-medium tracking-wide">Env</span>
+        </button>
+        <button onclick="switchTab('schedule', this)" class="nav-btn flex flex-col items-center gap-1.5 text-zinc-500 hover:text-zinc-300 transition-colors">
+            <i data-lucide="calendar" class="w-5 h-5"></i><span class="text-[10px] font-medium tracking-wide">Schedule</span>
+        </button>
+        <button onclick="switchTab('news', this)" class="nav-btn flex flex-col items-center gap-1.5 text-zinc-500 hover:text-zinc-300 transition-colors">
+            <i data-lucide="newspaper" class="w-5 h-5"></i><span class="text-[10px] font-medium tracking-wide">News</span>
+        </button>
+        <button onclick="switchTab('watch', this)" class="nav-btn flex flex-col items-center gap-1.5 text-zinc-500 hover:text-zinc-300 transition-colors">
+            <i data-lucide="play-square" class="w-5 h-5"></i><span class="text-[10px] font-medium tracking-wide">Watch</span>
+        </button>
     </nav>
 
     <script>
-        // Tab Switcher
-        function switchTab(id, el) {
-            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.nav-btn').forEach(n => n.classList.replace('text-violet-500', 'text-zinc-500'));
-            document.getElementById('tab-' + id).classList.add('active');
-            el.classList.replace('text-zinc-500', 'text-violet-500');
-        }
+        // --- HARDCODED GOOGLE SCRIPT URL ---
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbwa8Qmzkep4uFkyHJ8BhOa8JfnK2M9BCMA1olk_zAxICokkYDXr0gefUFFpHBF0Q5pzJg/exec";
 
-        // Expanded Feed Data
+        // --- EXTENSIVE MOCK DATA FOR FEEDS ---
         const newsData = [
-            { source: 'RTÉ', logo: 'https://upload.wikimedia.org/wikipedia/commons/e/e0/RT%C3%89_logo.svg', headline: 'New Climate Strategy for 2026', summary: 'Government announces major funding shift for coastal wind energy in Dublin Bay.' },
-            { source: 'BBC', logo: 'https://upload.wikimedia.org/wikipedia/commons/4/41/BBC_Sport_logo.svg', headline: 'All-Ireland Hurling Update', summary: 'Preparation begins for the final weekend; managers address training concerns.' },
-            { source: 'Journal', logo: 'https://www.thejournal.ie/static/assets/favicon.ico', headline: 'Dublin Housing Market Trends', summary: 'Recent data suggests a stabilization in rental prices across the city center.' },
-            { source: 'CNN', logo: 'https://upload.wikimedia.org/wikipedia/commons/6/66/CNN_International_logo.svg', headline: 'Global Tech Summits', summary: 'Dublin tech hub hosts international delegation to discuss AI governance.' }
+            { source: 'RTÉ News', logo: 'https://upload.wikimedia.org/wikipedia/commons/e/e0/RT%C3%89_logo.svg', headline: 'General Election: Latest poll shows shift in swing constituencies', summary: 'With weeks to go, the latest tracking data reveals tightening races across Dublin and Cork. Party leaders prepare for the final televised debate.' },
+            { source: 'TheJournal.ie', logo: 'https://www.thejournal.ie/static/assets/favicon.ico', headline: 'Dublin City Council announces new pedestrian zones', summary: 'Several streets around the city centre will be car-free on weekends starting next month to boost local retail and hospitality.' },
+            { source: 'BBC Sport', logo: 'https://upload.wikimedia.org/wikipedia/commons/4/41/BBC_Sport_logo.svg', headline: 'Six Nations Update: Ireland squad confirmed', summary: 'Head coach announces the 35-man training squad ahead of the crucial opening fixture against France next month.' },
+            { source: 'CNN', logo: 'https://upload.wikimedia.org/wikipedia/commons/6/66/CNN_International_logo.svg', headline: 'Global markets rally as inflation cools', summary: 'Tech stocks led the charge on Wall Street today following positive economic indicators from the Federal Reserve.' },
+            { source: 'The Guardian', logo: 'https://upload.wikimedia.org/wikipedia/commons/9/9d/The_Guardian_icon.svg', headline: 'New climate report warns of accelerating coastal erosion', summary: 'Scientists urge immediate action as sea levels pose a growing threat to coastal communities across Northern Europe.' },
+            { source: 'Irish Times', logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/8/87/The_Irish_Times_logo.svg/120px-The_Irish_Times_logo.svg.png', headline: 'Tech sector sees renewed hiring push in Dublin', summary: 'Major multinational firms have announced plans to expand their Irish workforce by 15% over the next two years.' },
+            { source: 'Sky Sports', logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/a/a5/Sky_Sports_logo_2020.svg/120px-Sky_Sports_logo_2020.svg.png', headline: 'Premier League: Weekend preview and predictions', summary: 'Can the league leaders maintain their advantage? We break down the key tactical battles ahead of Super Sunday.' }
         ];
 
         const watchData = [
-            { channel: 'The Daily Show', thumb: 'https://img.youtube.com/vi/oHg5SJYRHA0/0.jpg', title: 'Political Satire: The Latest on the Hill' },
-            { channel: 'Last Week Tonight', thumb: 'https://img.youtube.com/vi/b11-37Me_zcb/0.jpg', title: 'Systemic Issues in Modern Infrastructure' },
-            { channel: 'Some More News', thumb: 'https://img.youtube.com/vi/z3x5S2Jz91k/0.jpg', title: 'Why Everything is Suddenly Expensive' }
+            { channel: 'The Daily Show', thumb: 'https://img.youtube.com/vi/oHg5SJYRHA0/maxresdefault.jpg', title: 'Jon Stewart Tackles The Latest Headlines', views: '1.2M views' },
+            { channel: 'Last Week Tonight', thumb: 'https://img.youtube.com/vi/b11-37Me_zcb/maxresdefault.jpg', title: 'Infrastructure: Last Week Tonight with John Oliver', views: '3.4M views' },
+            { channel: 'Some More News', thumb: 'https://img.youtube.com/vi/z3x5S2Jz91k/maxresdefault.jpg', title: 'Why Everything Is Going Slightly Wrong', views: '800K views' },
+            { channel: 'The Late Show', thumb: 'https://img.youtube.com/vi/b11-37Me_zcb/hqdefault.jpg', title: 'Stephen Colbert: Monologue Highlight', views: '2.1M views' },
+            { channel: 'Late Night', thumb: 'https://img.youtube.com/vi/z3x5S2Jz91k/hqdefault.jpg', title: 'Seth Meyers: A Closer Look', views: '1.5M views' },
+            { channel: 'Jimmy Kimmel Live', thumb: 'https://img.youtube.com/vi/oHg5SJYRHA0/hqdefault.jpg', title: 'Jimmy Kimmel Monologue', views: '950K views' }
         ];
 
-        // Init
-        window.onload = () => {
-            lucide.createIcons();
-            document.getElementById('date').textContent = new Date().toDateString();
-            document.getElementById('weather-summary').textContent = "Expect a mix of cloud and sun with light rain showers likely in the mid-afternoon. Highs of 21°C, dropping to a cool 12°C tonight.";
-            
-            // Populate Feeds
-            const newsFeed = document.getElementById('news-feed');
-            newsData.forEach(n => {
-                newsFeed.innerHTML += `<div class="bg-zinc-900 p-4 rounded-xl border border-zinc-800 flex gap-4">
-                    <img src="${n.logo}" class="w-8 h-8 rounded-full bg-white p-1">
-                    <div><h4 class="font-bold text-sm">${n.headline}</h4><p class="text-xs text-zinc-400 mt-1">${n.summary}</p></div>
-                </div>`;
-            });
+        // --- TAB SWITCHER ---
+        function switchTab(id, el) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(n => n.classList.replace('text-violet-400', 'text-zinc-500'));
+            document.getElementById('tab-' + id).classList.add('active');
+            el.classList.replace('text-zinc-500', 'text-violet-400');
+        }
 
-            const watchFeed = document.getElementById('watch-feed');
-            watchData.forEach(w => {
-                watchFeed.innerHTML += `<div class="bg-zinc-900 rounded-xl overflow-hidden border border-zinc-800">
-                    <img src="${w.thumb}" class="w-full h-40 object-cover">
-                    <div class="p-4"><h4 class="font-bold text-sm">${w.title}</h4><p class="text-xs text-zinc-500">${w.channel}</p></div>
-                </div>`;
-            });
+        // --- STREAMING_CHUNK: Fetching live weather data ---
+        // --- OPEN-METEO WEATHER FETCH (DUBLIN) ---
+        async function fetchWeather() {
+            try {
+                // Fetch Dublin coords
+                const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=53.3441&longitude=-6.2675&current_weather=true&daily=temperature_2m_max,temperature_2m_min,weathercode&timezone=Europe%2FLondon');
+                const data = await res.json();
+                
+                const current = data.current_weather;
+                const daily = data.daily;
+                
+                document.getElementById('weather-temp').textContent = `${Math.round(current.temperature)}°C`;
+                document.getElementById('weather-high').textContent = `${Math.round(daily.temperature_2m_max[0])}°C`;
+                document.getElementById('weather-low').textContent = `${Math.round(daily.temperature_2m_min[0])}°C`;
+                
+                // Weather Code translation
+                const code = current.weathercode;
+                let summary = "Expect fairly typical conditions today.";
+                if(code <= 3) summary = `Expect mostly clear or partly cloudy skies today with highs reaching ${Math.round(daily.temperature_2m_max[0])}°C. A great day to be out.`;
+                else if (code <= 48) summary = `Visibility might be reduced due to fog. Temperatures maxing out at ${Math.round(daily.temperature_2m_max[0])}°C.`;
+                else if (code <= 69) summary = `Bring an umbrella! Light to moderate rain expected throughout the day. Highs of ${Math.round(daily.temperature_2m_max[0])}°C.`;
+                else if (code <= 79) summary = `Snow or sleet is possible today. Dress warmly, highs will struggle to reach ${Math.round(daily.temperature_2m_max[0])}°C.`;
+                else summary = `Heavy rain and potential showers. Keep dry, highs around ${Math.round(daily.temperature_2m_max[0])}°C.`;
+                
+                document.getElementById('weather-summary').textContent = summary;
+
+            } catch (err) {
+                document.getElementById('weather-summary').textContent = "Weather API unavailable. Look out the window!";
+            }
+        }
+
+        // --- STREAMING_CHUNK: Rendering the tide graph on the canvas ---
+        // --- CANVAS TIDE GRAPH ---
+        function drawTideGraph() {
+            const canvas = document.getElementById('tide-canvas');
+            const ctx = canvas.getContext('2d');
+            
+            // Handle retina displays
+            const rect = canvas.parentElement.getBoundingClientRect();
+            canvas.width = rect.width * 2;
+            canvas.height = rect.height * 2;
+            ctx.scale(2, 2);
+            
+            const w = rect.width;
+            const h = rect.height;
+            
+            // Draw Sine Wave
+            ctx.beginPath();
+            ctx.moveTo(0, h);
+            
+            // Generate points (simulating 24h tide cycle)
+            let currentX = 0;
+            let currentY = 0;
+            const now = new Date();
+            const currentHour = now.getHours() + (now.getMinutes() / 60);
+            
+            for (let x = 0; x <= w; x++) {
+                const hourMapped = (x / w) * 24;
+                // Cosine wave representing tides
+                const y = (h/2) + Math.cos((hourMapped - 6) * Math.PI / 6) * (h/3);
+                ctx.lineTo(x, y);
+                
+                if (Math.abs(hourMapped - currentHour) < 0.1) {
+                    currentX = x;
+                    currentY = y;
+                }
+            }
+            
+            ctx.lineTo(w, h);
+            ctx.lineTo(0, h);
+            
+            // Fill gradient
+            const grad = ctx.createLinearGradient(0, 0, 0, h);
+            grad.addColorStop(0, 'rgba(139, 92, 246, 0.4)'); // Violet
+            grad.addColorStop(1, 'rgba(139, 92, 246, 0.0)');
+            ctx.fillStyle = grad;
+            ctx.fill();
+            
+            // Stroke line
+            ctx.beginPath();
+            for (let x = 0; x <= w; x++) {
+                const hourMapped = (x / w) * 24;
+                const y = (h/2) + Math.cos((hourMapped - 6) * Math.PI / 6) * (h/3);
+                if(x===0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+            }
+            ctx.strokeStyle = '#8b5cf6';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            // Draw Current Time Indicator
+            if (currentX > 0) {
+                // Vertical dashed line
+                ctx.beginPath();
+                ctx.setLineDash([4, 4]);
+                ctx.moveTo(currentX, 0);
+                ctx.lineTo(currentX, h);
+                ctx.strokeStyle = 'rgba(244, 63, 94, 0.5)'; // Rose
+                ctx.stroke();
+                ctx.setLineDash([]);
+                
+                // Dot
+                ctx.beginPath();
+                ctx.arc(currentX, currentY, 4, 0, Math.PI * 2);
+                ctx.fillStyle = '#f43f5e';
+                ctx.fill();
+                ctx.strokeStyle = '#fff';
+                ctx.lineWidth = 1.5;
+                ctx.stroke();
+            }
+        }
+
+        // --- STREAMING_CHUNK: Fetching events from Google Apps Script ---
+        // --- FETCH GOOGLE CALENDAR ---
+        async function fetchSchedule() {
+            const container = document.getElementById('schedule-feed');
+            
+            try {
+                const response = await fetch(GAS_URL);
+                if (!response.ok) throw new Error(`Network response failed: ${response.status}`);
+                
+                const data = await response.json();
+                
+                if (data.status === "error") throw new Error(data.message);
+                
+                if (!data.events || data.events.length === 0) {
+                    container.innerHTML = `
+                        <div class="bg-zinc-900/80 p-6 rounded-2xl border border-zinc-800/80 text-center">
+                            <i data-lucide="coffee" class="w-8 h-8 mx-auto text-zinc-600 mb-3"></i>
+                            <p class="text-sm font-medium text-zinc-300">No events today</p>
+                            <p class="text-xs text-zinc-500 mt-1">Your schedule is clear. Enjoy the day!</p>
+                        </div>`;
+                    lucide.createIcons();
+                    return;
+                }
+
+                container.innerHTML = data.events.map(ev => `
+                    <div class="bg-zinc-900/80 p-4 rounded-2xl border border-zinc-800/80 flex gap-4 items-start shadow-sm">
+                        <div class="text-violet-400 font-bold min-w-[75px] text-sm pt-0.5">${ev.time}</div>
+                        <div class="w-px bg-zinc-800 self-stretch rounded-full"></div>
+                        <div class="flex-1 pb-1">
+                            <h4 class="font-semibold text-sm text-zinc-100 leading-snug">${ev.title}</h4>
+                            ${ev.loc ? `<p class="text-xs text-zinc-400 mt-2 flex items-start gap-1.5"><i data-lucide="map-pin" class="w-3.5 h-3.5 shrink-0 mt-0.5 opacity-70"></i> <span class="leading-relaxed">${ev.loc}</span></p>` : ''}
+                        </div>
+                    </div>
+                `).join('');
+                
+                lucide.createIcons();
+
+            } catch (error) {
+                // EXPLICIT ERROR RENDERING
+                container.innerHTML = `
+                    <div class="bg-red-950/20 border border-red-900/50 p-5 rounded-2xl">
+                        <h4 class="text-red-400 font-semibold text-sm flex items-center gap-2 mb-3"><i data-lucide="alert-triangle" class="w-5 h-5"></i> Connection Failed</h4>
+                        <p class="text-xs text-red-300/80 font-mono bg-red-950/50 p-2 rounded break-words mb-3">${error.message}</p>
+                        <p class="text-[11px] text-zinc-400 leading-relaxed">Ensure your Google Apps Script is deployed as a Web App, and that "Who has access" is set exactly to <b>"Anyone"</b>.</p>
+                    </div>
+                `;
+                lucide.createIcons();
+            }
+        }
+
+        // --- STREAMING_CHUNK: Bootstrapping and rendering static feeds ---
+        // --- RENDER STATIC FEEDS ---
+        function renderFeeds() {
+            const newsContainer = document.getElementById('news-feed');
+            newsContainer.innerHTML = newsData.map(n => `
+                <article class="bg-zinc-900/80 p-4 rounded-2xl border border-zinc-800/80 flex gap-4 shadow-sm items-start">
+                    <img src="${n.logo}" class="w-10 h-10 rounded-full bg-white p-1.5 shrink-0 object-contain shadow-inner" onerror="this.src='https://placehold.co/40x40/3f3f46/ffffff?text=N'">
+                    <div>
+                        <span class="text-[10px] font-bold uppercase tracking-wider text-violet-400 mb-1 block">${n.source}</span>
+                        <h4 class="font-bold text-sm text-zinc-100 leading-snug mb-1.5">${n.headline}</h4>
+                        <p class="text-xs text-zinc-400 line-clamp-2 leading-relaxed">${n.summary}</p>
+                    </div>
+                </article>
+            `).join('');
+
+            const watchContainer = document.getElementById('watch-feed');
+            watchContainer.innerHTML = watchData.map(w => `
+                <article class="bg-zinc-900/80 rounded-2xl overflow-hidden border border-zinc-800/80 shadow-sm group">
+                    <div class="relative w-full h-48 bg-zinc-800">
+                        <img src="${w.thumb}" class="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity">
+                        <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/30">
+                            <i data-lucide="play-circle" class="w-12 h-12 text-white"></i>
+                        </div>
+                    </div>
+                    <div class="p-4">
+                        <h4 class="font-bold text-sm text-zinc-100 leading-snug line-clamp-2 mb-1.5">${w.title}</h4>
+                        <div class="flex items-center justify-between text-xs text-zinc-400">
+                            <span>${w.channel}</span>
+                            <span>${w.views}</span>
+                        </div>
+                    </div>
+                </article>
+            `).join('');
+        }
+
+        // --- INIT ---
+        window.onload = () => {
+            // Set Date
+            const options = { weekday: 'long', month: 'short', day: 'numeric' };
+            document.getElementById('date-display').textContent = new Date().toLocaleDateString('en-IE', options);
+            
+            // Trigger API Fetches and renders
+            fetchWeather();
+            drawTideGraph();
+            fetchSchedule();
+            renderFeeds();
+            
+            // Initialize lucide icons
+            lucide.createIcons();
         };
     </script>
 </body>
 </html>
-```
-
-### Why this version feels more "Production" ready:
-1. **Dynamic Scaling:** You now have high-contrast containers that scale with your content.
-2. **Visual Hierarchy:** Logos are separated from headlines, and the summaries are given their own dedicated visual space (the `text-zinc-400` styling).
-3. **The "Rise" Branding:** Every tab header and the app icon now prominently features the new sun-over-horizon icon.
-4. **Resilience:** The content is organized in a `scrollable-feed` block, so no matter how many news stories we fetch, you won't break the UI.
-
-**Action Item:** Paste this into your repository. If the logo doesn't change immediately, perform the "Website Data" cache clear in your browser settings (Safari/Chrome) that we discussed earlier!
