@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Daily Rundown</title>
+    
+    <!-- PWA iOS Standalone Meta Tags -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#09090b">
+    
+    <!-- Tailwind CSS Engine & Premium Fonts -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: {
+                        brand: {
+                            50: '#f5f3ff',
+                            100: '#ede9fe',
+                            500: '#8b5cf6',
+                            600: '#7c3aed',
+                            900: '#4c1d95',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #09090b;
+            color: #f4f4f5;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="pb-24 px-4 pt-6 max-w-md mx-auto font-sans antialiased">
+
+    <header class="flex justify-between items-start mb-6">
+        <div>
+            <h1 class="text-2xl font-extrabold tracking-tight bg-gradient-to-r from-violet-400 to-brand-500 bg-clip-text text-transparent">Daily Rundown</h1>
+            <p id="current-date" class="text-sm text-zinc-400 font-medium">Loading date...</p>
+        </div>
+        <button onclick="toggleSettings()" class="p-2 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-brand-500 transition-colors">
+            <i data-lucide="settings" class="w-5 h-5"></i>
+        </button>
+    </header>
+
+    <!-- MAIN DASHBOARD CONTENT -->
+    <main class="space-y-4">
+
+        <section id="tab-weather" class="tab-content space-y-4">
+            
+            <!-- Weather Grid -->
+            <div class="grid grid-cols-2 gap-3">
+                <div class="bg-zinc-900/60 border border-zinc-800/80 rounded-2xl p-4 flex flex-col justify-between">
+                    <div class="flex justify-between items-center text-zinc-500">
+                        <span class="text-xs font-semibold uppercase tracking-wider">Dublin</span>
+                        <i data-lucide="cloud-sun" class="w-4 h-4 text-brand-500"></i>
+                    </div>
+                    <div class="mt-4">
+                        <span id="temp-val" class="text-3xl font-bold tracking-tight">--°C</span>
+                        <p id="cond-val" class="text-xs text-zinc-400 mt-1 font-medium">Fetching details...</p>
+                    </div>
+                </div>
+
+                <div class="bg-zinc-900/60 border border-zinc-800/80 rounded-2xl p-4 flex flex-col justify-between">
+                    <div class="flex justify-between items-center text-zinc-500">
+                        <span class="text-xs font-semibold uppercase tracking-wider">Sun Cycle</span>
+                        <i data-lucide="sun" class="w-4 h-4 text-amber-500"></i>
+                    </div>
+                    <div class="mt-4 space-y-1">
+                        <div class="flex items-center gap-2 text-xs">
+                            <i data-lucide="sunrise" class="w-3.5 h-3.5 text-zinc-500"></i>
+                            <span id="sunrise-val" class="font-semibold text-zinc-300">--:--</span>
+                        </div>
+                        <div class="flex items-center gap-2 text-xs">
+                            <i data-lucide="sunset" class="w-3.5 h-3.5 text-zinc-500"></i>
+                            <span id="sunset-val" class="font-semibold text-zinc-300">--:--</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tidal Card -->
+            <div class="bg-zinc-900/60 border border-zinc-800/80 rounded-2xl p-4">
+                <div class="flex justify-between items-center mb-3">
+                    <h3 class="text-sm font-semibold text-zinc-400 flex items-center gap-2">
+                        <i data-lucide="waves" class="w-4 h-4 text-brand-500"></i> Dublin Bay Tides
+                    </h3>
+                    <span id="tide-status" class="text-xs px-2.5 py-1 rounded-full font-bold bg-brand-500/10 text-brand-400">Calculating...</span>
+                </div>
+                
+                <!-- Tide Progress Bar -->
+                <div class="w-full bg-zinc-800 h-2 rounded-full overflow-hidden mb-4 relative">
+                    <div id="tide-progress" class="bg-gradient-to-r from-brand-500 to-violet-500 h-full w-1/2 transition-all duration-1000"></div>
+                </div>
+
+                <div class="space-y-2.5" id="tide-list">
+                    <!-- Loaded dynamically via Local Harmonic Prediction Engine -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Tab 2: Schedule (Connected to Google Apps Script Web App) -->
+        <section id="tab-schedule" class="tab-content space-y-4 hidden">
+            <div class="bg-zinc-900/60 border border-zinc-800/80 rounded-2xl p-4">
+                <div class="flex justify-between items-center mb-3">
+                    <h3 class="text-sm font-semibold text-zinc-400 flex items-center gap-2">
+                        <i data-lucide="calendar" class="w-4 h-4 text-brand-500"></i> Kids & Family Agenda
+                    </h3>
+                    <span id="calendar-sync-indicator" class="text-[10px] px-2 py-0.5 rounded bg-zinc-800 text-zinc-400">Local Mode</span>
+                </div>
+
+                <!-- Banner Notification Box (Replaces alerts) -->
+                <div id="notification-banner" class="hidden text-xs px-3 py-2 rounded-xl border mb-3 transition-all duration-300">
+                    <p id="notification-text"></p>
+                </div>
+
+                <div id="schedule-container" class="space-y-3">
+                    <!-- Events loaded here -->
+                </div>
+
+                <!-- Custom event entry fallback -->
+                <details class="group mt-4 border-t border-zinc-800/80 pt-3">
+                    <summary class="text-xs font-semibold text-zinc-500 hover:text-brand-500 cursor-pointer list-none flex items-center justify-between">
+                        <span>+ Add custom reminder for today</span>
+                        <i data-lucide="chevron-down" class="w-3.5 h-3.5 transition-transform group-open:rotate-180"></i>
+                    </summary>
+                    <div class="space-y-2 mt-3">
+                        <input type="text" id="event-time" placeholder="Time (e.g. 05:00 PM)" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-sm text-zinc-200 outline-none focus:border-brand-500">
+                        <input type="text" id="event-title" placeholder="Event (e.g. Swimming Lesson)" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-sm text-zinc-200 outline-none focus:border-brand-500">
+                        <input type="text" id="event-loc" placeholder="Location (e.g. Markievicz Sports Centre)" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-sm text-zinc-200 outline-none focus:border-brand-500">
+                        <button onclick="addScheduleItem()" class="w-full bg-brand-600 hover:bg-brand-500 text-white py-2 rounded-xl text-sm font-bold transition-all shadow-lg shadow-brand-900/20">Add Event</button>
+                    </div>
+                </details>
+            </div>
+        </section>
+
+        <!-- Tab 3: News and Satire Video Feeds -->
+        <section id="tab-feeds" class="tab-content space-y-4 hidden">
+            <!-- News Highlights -->
+            <div class="bg-zinc-900/60 border border-zinc-800/80 rounded-2xl p-4">
+                <h3 class="text-sm font-semibold text-zinc-400 flex items-center gap-2 mb-3">
+                    <i data-lucide="newspaper" class="w-4 h-4 text-brand-500"></i> Live National News
+                </h3>
+                <div id="news-container" class="space-y-3 divide-y divide-zinc-800/50">
+                    <p class="text-xs text-zinc-500 py-3">Fetching current updates...</p>
+                </div>
+            </div>
+
+            <!-- YouTube Feeds -->
+            <div class="bg-zinc-900/60 border border-zinc-800/80 rounded-2xl p-4">
+                <h3 class="text-sm font-semibold text-zinc-400 flex items-center gap-2 mb-3">
+                    <i data-lucide="youtube" class="w-4 h-4 text-brand-500"></i> Satire & Comedy Drops
+                </h3>
+                <div id="yt-container" class="space-y-3 divide-y divide-zinc-800/50">
+                    <p class="text-xs text-zinc-500 py-3">Checking for fresh uploads...</p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-[200] flex items-center justify-center px-4 hidden">
+        <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 w-full max-w-sm space-y-4">
+            <div class="flex justify-between items-center">
+                <h3 class="font-bold text-lg">App Settings</h3>
+                <button onclick="toggleSettings()" class="text-zinc-500 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+            
+            <div class="space-y-1">
+                <label class="text-xs font-semibold text-zinc-400 block">Google Apps Script Web App URL</label>
+                <input type="text" id="gcal-url-input" placeholder="https://script.google.com/macros/s/.../exec" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2.5 text-xs text-zinc-200 outline-none focus:border-brand-500">
+                <span class="text-[10px] text-zinc-500 block leading-tight">Paste your private Web App URL copied from your Google Apps Script deployment page to fetch live calendar events.</span>
+            </div>
+
+            <button onclick="saveSettings()" class="w-full bg-brand-600 hover:bg-brand-500 text-white py-2.5 rounded-xl text-sm font-bold transition-all">Save & Sync</button>
+        </div>
+    </div>
+
+    <!-- Navigation bar -->
+    <nav class="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-zinc-950/95 border-t border-zinc-800/80 p-4 flex justify-around rounded-t-3xl z-100 backdrop-blur-lg shadow-2xl">
+        <button class="nav-item flex flex-col items-center gap-1 text-zinc-500 text-[10px] font-medium active" onclick="switchTab('weather', this)">
+            <i data-lucide="cloud-sun" class="w-5 h-5 transition-transform duration-200"></i>
+            <span>Environment</span>
+        </button>
+        <button class="nav-item flex flex-col items-center gap-1 text-zinc-500 text-[10px] font-medium" onclick="switchTab('schedule', this)">
+            <i data-lucide="calendar" class="w-5 h-5 transition-transform duration-200"></i>
+            <span>Schedule</span>
+        </button>
+        <button class="nav-item flex flex-col items-center gap-1 text-zinc-500 text-[10px] font-medium" onclick="switchTab('feeds', this)">
+            <i data-lucide="rss" class="w-5 h-5 transition-transform duration-200"></i>
+            <span>Feeds</span>
+        </button>
+    </nav>
+
+    <script>
+        // Set Today's Local Date Header
+        const options = { weekday: 'long', day: 'numeric', month: 'short', year: 'numeric' };
+        document.getElementById('current-date').textContent = new Date().toLocaleDateString('en-IE', options);
+
+        // Core App Tab Controller
+        function switchTab(tabName, el) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.add('hidden'));
+            document.getElementById(`tab-${tabName}`).classList.remove('hidden');
+            
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('text-brand-500');
+                item.classList.add('text-zinc-500');
+                item.querySelector('i').classList.remove('scale-110');
+            });
+            
+            el.classList.add('text-brand-500');
+            el.classList.remove('text-zinc-500');
+            el.querySelector('i').classList.add('scale-110');
+        }
+
+        // Custom Non-blocking UI Notification Engine
+        function showNotification(message, type = 'success') {
+            const banner = document.getElementById('notification-banner');
+            const text = document.getElementById('notification-text');
+            
+            text.textContent = message;
+            banner.classList.remove('hidden');
+            
+            if (type === 'success') {
+                banner.className = "text-xs px-3 py-2 rounded-xl border mb-3 transition-all duration-300 bg-green-500/10 border-green-500/20 text-green-400";
+            } else {
+                banner.className = "text-xs px-3 py-2 rounded-xl border mb-3 transition-all duration-300 bg-red-500/10 border-red-500/20 text-red-400";
+            }
+
+            setTimeout(() => {
+                banner.classList.add('hidden');
+            }, 4000);
+        }
+
+        // Live Dublin Weather API Handler
+        async function fetchDublinWeather() {
+            try {
+                const response = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=53.3498&longitude=-6.2603&current_weather=true&daily=sunrise,sunset&timezone=Europe/Dublin`);
+                const data = await response.json();
+                
+                if (data && data.current_weather) {
+                    document.getElementById('temp-val').textContent = `${Math.round(data.current_weather.temperature)}°C`;
+                    document.getElementById('cond-val').textContent = translateWeatherCode(data.current_weather.weathercode);
+                    
+                    if (data.daily) {
+                        document.getElementById('sunrise-val').textContent = data.daily.sunrise[0].split('T')[1];
+                        document.getElementById('sunset-val').textContent = data.daily.sunset[0].split('T')[1];
+                    }
+                }
+            } catch (err) {
+                console.error("Dublin weather sync failure:", err);
+                document.getElementById('cond-val').textContent = "Offline Forecast";
+            }
+        }
+
+        function translateWeatherCode(code) {
+            const mappings = {
+                0: 'Clear sky ☀️', 1: 'Mainly clear 🌤️', 2: 'Partly cloudy ⛅', 3: 'Overcast ☁️',
+                45: 'Foggy 🌫️', 51: 'Light Drizzle 🌧️', 61: 'Slight Rain 🌧️', 81: 'Rain Showers 🌦️'
+            };
+            return mappings[code] || 'Misty weather 🌫️';
+        }
+
+        // Dublin Lunar Tide Prediction Engine
+        function calculateLiveDublinTides() {
+            const now = new Date();
+            
+            // Reference Dublin (North Wall) High Tide Point: 16 July 2026, 13:52 BST (UTC+1)
+            const refTide = new Date('2026-07-16T12:52:00Z');
+            
+            // Average Lunar Tidal cycle: 12.4206 hours
+            const periodMs = 12.420601 * 60 * 60 * 1000;
+            
+            const diffMs = now.getTime() - refTide.getTime();
+            const elapsedCycles = diffMs / periodMs;
+            
+            const lastCycleIndex = Math.floor(elapsedCycles);
+            const highTide1 = new Date(refTide.getTime() + lastCycleIndex * periodMs);
+            const highTide2 = new Date(refTide.getTime() + (lastCycleIndex + 1) * periodMs);
+            
+            const lowTide1 = new Date(highTide1.getTime() - periodMs / 2);
+            const lowTide2 = new Date(highTide1.getTime() + periodMs / 2);
+            const lowTide3 = new Date(highTide2.getTime() + periodMs / 2);
+
+            // Predict height values relative to mean low water values
+            const tides = [
+                { type: 'High', time: highTide1, height: 4.1 },
+                { type: 'Low', time: lowTide1, height: 0.3 },
+                { type: 'Low', time: lowTide2, height: 0.5 },
+                { type: 'High', time: highTide2, height: 3.9 },
+                { type: 'Low', time: lowTide3, height: 0.6 }
+            ].sort((a,b) => a.time - b.time);
+
+            const todayTides = tides.filter(t => t.time.toDateString() === now.toDateString());
+            
+            const listEl = document.getElementById('tide-list');
+            listEl.innerHTML = '';
+            
+            todayTides.forEach(tide => {
+                const formattedTime = tide.time.toLocaleTimeString('en-IE', { hour: '2-digit', minute: '2-digit', hour12: true });
+                const icon = tide.type === 'High' ? 'waves' : 'droplet';
+                const color = tide.type === 'High' ? 'text-blue-400' : 'text-zinc-500';
+                
+                listEl.innerHTML += `
+                    <div class="flex justify-between items-center text-sm border-b border-zinc-800/40 py-2.5 last:border-0">
+                        <span class="flex items-center gap-2 text-zinc-400">
+                            <i data-lucide="${icon}" class="w-4 h-4 ${color}"></i>
+                            ${tide.type} Tide
+                        </span>
+                        <strong class="text-zinc-200">${formattedTime} <span class="text-xs text-zinc-500 font-normal">(${tide.height}m)</span></strong>
+                    </div>
+                `;
+            });
+
+            const upcomingTide = tides.find(t => t.time > now);
+            if (upcomingTide) {
+                const statusText = upcomingTide.type === 'High' ? '🌊 Rising' : '💧 Falling';
+                document.getElementById('tide-status').textContent = statusText;
+                
+                const previousTide = tides.filter(t => t.time <= now).pop();
+                if (previousTide) {
+                    const totalDuration = upcomingTide.time - previousTide.time;
+                    const elapsed = now - previousTide.time;
+                    const pct = Math.max(0, Math.min(100, (elapsed / totalDuration) * 100));
+                    document.getElementById('tide-progress').style.width = `${pct}%`;
+                }
+            }
+            lucide.createIcons();
+        }
+
+        let localSchedule = [
+            { time: "09:30 AM", title: "Kids' Summer Camp Drop-off", loc: "Herbert Park" },
+            { time: "02:30 PM", title: "Pick-up & Playground Walk", loc: "St. Anne's Park" }
+        ];
+
+        function toggleSettings() {
+            document.getElementById('settings-modal').classList.toggle('hidden');
+        }
+
+        function saveSettings() {
+            const urlInput = document.getElementById('gcal-url-input').value.trim();
+            localStorage.setItem('gas_calendar_url', urlInput);
+            toggleSettings();
+            syncCalendar();
+        }
+
+        async function syncCalendar() {
+            const gasUrl = localStorage.getItem('gas_calendar_url');
+            const indicator = document.getElementById('calendar-sync-indicator');
+            
+            if (!gasUrl) {
+                indicator.textContent = "Local Mode";
+                indicator.className = "text-[10px] px-2 py-0.5 rounded bg-zinc-800 text-zinc-400";
+                loadLocalEvents();
+                return;
+            }
+
+            indicator.textContent = "Syncing GCal...";
+            indicator.className = "text-[10px] px-2 py-0.5 rounded bg-amber-500/10 text-amber-400";
+
+            try {
+                // Secure serverless direct fetch - Apps Script CORS redirection is automatically handled
+                const response = await fetch(gasUrl);
+                const result = await response.json();
+                
+                if (result && result.status === "success" && result.events) {
+                    localSchedule = result.events;
+                    localStorage.setItem('local_schedule_list', JSON.stringify(localSchedule));
+                    renderSchedule();
+                    indicator.textContent = "Synced";
+                    indicator.className = "text-[10px] px-2 py-0.5 rounded bg-green-500/10 text-green-400";
+                    showNotification("Calendar synced successfully!");
+                } else {
+                    throw new Error(result.message || "Invalid structure returned");
+                }
+            } catch (err) {
+                console.warn("Apps Script fetch sync failed, falling back to local storage:", err);
+                indicator.textContent = "Sync Error";
+                indicator.className = "text-[10px] px-2 py-0.5 rounded bg-red-500/10 text-red-400";
+                showNotification("Could not reach calendar bridge. Running off local data.", "error");
+                loadLocalEvents();
+            }
+        }
+
+        function loadLocalEvents() {
+            const stored = localStorage.getItem('local_schedule_list');
+            if (stored) {
+                localSchedule = JSON.parse(stored);
+            }
+            renderSchedule();
+        }
+
+        function renderSchedule() {
+            const container = document.getElementById('schedule-container');
+            container.innerHTML = '';
+            
+            if (localSchedule.length === 0) {
+                container.innerHTML = `
+                    <p class="text-zinc-500 text-center text-xs py-6">Your agenda is clear for today.</p>
+                `;
+                return;
+            }
+
+            localSchedule.forEach((item, index) => {
+                container.innerHTML += `
+                    <div class="flex items-start justify-between bg-zinc-950/40 border border-zinc-800/40 rounded-xl p-3">
+                        <div class="flex gap-3">
+                            <span class="text-xs font-bold text-brand-400 min-w-[65px] mt-0.5">${item.time}</span>
+                            <div class="space-y-0.5">
+                                <h4 class="text-sm font-semibold text-zinc-100">${item.title}</h4>
+                                <span class="text-xs text-zinc-500 flex items-center gap-1">
+                                    <i data-lucide="map-pin" class="w-3 h-3 text-zinc-600"></i> ${item.loc}
+                                </span>
+                            </div>
+                        </div>
+                        <button onclick="deleteScheduleItem(${index})" class="text-zinc-600 hover:text-red-400 transition-colors">
+                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                `;
+            });
+            lucide.createIcons();
+        }
+
+        function addScheduleItem() {
+            const time = document.getElementById('event-time').value.trim();
+            const title = document.getElementById('event-title').value.trim();
+            const loc = document.getElementById('event-loc').value.trim();
+
+            if (!time || !title) {
+                showNotification("Please provide both a Time and Title", "error");
+                return;
+            }
+
+            localSchedule.push({ time, title, loc: loc || "Dublin" });
+            localStorage.setItem('local_schedule_list', JSON.stringify(localSchedule));
+            
+            document.getElementById('event-time').value = '';
+            document.getElementById('event-title').value = '';
+            document.getElementById('event-loc').value = '';
+            
+            renderSchedule();
+            showNotification("Event added locally!");
+        }
+
+        function deleteScheduleItem(index) {
+            localSchedule.splice(index, 1);
+            localStorage.setItem('local_schedule_list', JSON.stringify(localSchedule));
+            renderSchedule();
+            showNotification("Event removed.");
+        }
+
+        // Live News RSS Parser Service
+        async function fetchLiveNews() {
+            const container = document.getElementById('news-container');
+            try {
+                // Fetch RTÉ feed through RSS conversion proxy
+                const rssUrl = "https://www.rte.ie/news/rss/news-headlines.xml";
+                const response = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`);
+                const data = await response.json();
+                
+                if (data && data.items && data.items.length > 0) {
+                    container.innerHTML = '';
+                    data.items.slice(0, 3).forEach(item => {
+                        container.innerHTML += `
+                            <a href="${item.link}" target="_blank" class="block py-2.5 group">
+                                <h4 class="text-sm font-medium text-zinc-200 group-hover:text-brand-400 transition-colors leading-relaxed mb-1">${item.title}</h4>
+                                <span class="text-[10px] text-zinc-500 font-semibold uppercase tracking-wider">RTÉ News</span>
+                            </a>
+                        `;
+                    });
+                }
+            } catch (err) {
+                console.error("News sync failure:", err);
+                container.innerHTML = `<p class="text-xs text-zinc-500">Failed to load live news.</p>`;
+            }
+        }
+
+        // Live Subscriptions RSS Parser Service
+        async function fetchLiveYouTubeFeeds() {
+            const container = document.getElementById('yt-container');
+            const channels = [
+                { name: "The Daily Show", id: "UCwWhs_6x42TyRM4Wstoq8HA" },
+                { name: "Last Week Tonight", id: "UC3XTzVzaHQEd30rQbuvCtTQ" },
+                { name: "The Late Show with Stephen Colbert", id: "UCMtA3_vK68V95-u9b0vV-6g" }
+            ];
+
+            try {
+                container.innerHTML = '';
+                for (const channel of channels) {
+                    const rssUrl = `https://www.youtube.com/feeds/videos.xml?channel_id=${channel.id}`;
+                    const response = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`);
+                    const data = await response.json();
+
+                    if (data && data.items && data.items.length > 0) {
+                        const video = data.items[0];
+                        container.innerHTML += `
+                            <a href="${video.link}" target="_blank" class="block py-2.5 group">
+                                <h4 class="text-sm font-medium text-zinc-200 group-hover:text-brand-400 transition-colors leading-relaxed mb-1">${video.title}</h4>
+                                <span class="text-[10px] text-zinc-500 font-semibold uppercase tracking-wider">${channel.name} • Live upload</span>
+                            </a>
+                        `;
+                    }
+                }
+            } catch (err) {
+                console.error("YouTube parse sync failure:", err);
+                container.innerHTML = `<p class="text-xs text-zinc-500">Failed to pull comedy uploads.</p>`;
+            }
+        }
+
+        // Initialize Core Services on Page Boot
+        window.onload = () => {
+            fetchDublinWeather();
+            calculateLiveDublinTides();
+            syncCalendar();
+            fetchLiveNews();
+            fetchLiveYouTubeFeeds();
+            
+            const savedUrl = localStorage.getItem('gas_calendar_url');
+            if (savedUrl) {
+                document.getElementById('gcal-url-input').value = savedUrl;
+            }
+            
+            lucide.createIcons();
+        };
+    </script>
+</body>
+</html>
