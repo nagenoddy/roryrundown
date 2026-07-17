@@ -6,8 +6,8 @@
     <title>Daily Rundown</title>
     
     <!-- PWA Branding & Icons -->
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%2318181b'/><circle cx='65' cy='40' r='18' fill='%23f59e0b'/><rect x='22' y='35' width='46' height='50' rx='8' fill='%238b5cf6'/><path d='M32 50 H 58 M32 62 H 58 M32 74 H 46' stroke='%23ffffff' stroke-width='5' stroke-linecap='round'/></svg>">
-    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%2318181b'/><circle cx='65' cy='40' r='18' fill='%23f59e0b'/><rect x='22' y='35' width='46' height='50' rx='8' fill='%238b5cf6'/><path d='M32 50 H 58 M32 62 H 58 M32 74 H 46' stroke='%23ffffff' stroke-width='5' stroke-linecap='round'/></svg>">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%2318181b'/><circle cx='50' cy='45' r='20' fill='%23f59e0b'/><path d='M20 60 H 80 M30 70 H 70 M40 80 H 60' stroke='%238b5cf6' stroke-width='6' stroke-linecap='round'/></svg>">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%2318181b'/><circle cx='50' cy='45' r='20' fill='%23f59e0b'/><path d='M20 60 H 80 M30 70 H 70 M40 80 H 60' stroke='%238b5cf6' stroke-width='6' stroke-linecap='round'/></svg>">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     
@@ -94,6 +94,7 @@
     <!-- Main Content Area -->
     <main class="px-4 mt-6">
         
+        <!-- -->
         <!-- TAB 1: Weather & Tides -->
         <section id="tab-weather" class="tab-content active">
             
@@ -155,10 +156,18 @@
             </div>
         </section>
 
+        <!-- -->
         <!-- TAB 2: Schedule -->
         <section id="tab-schedule" class="tab-content">
             <div class="flex items-center justify-between mb-6 px-1">
-                <h2 class="text-lg font-bold text-zinc-200 flex items-center gap-2"><i data-lucide="calendar-days" class="w-5 h-5 text-violet-400"></i> Today's Agenda</h2>
+                <h2 class="text-lg font-bold text-zinc-200 flex items-center gap-2"><i data-lucide="calendar-days" class="w-5 h-5 text-violet-400"></i> <span id="agenda-date-title">Today's Agenda</span></h2>
+                
+                <!-- Pagination Arrows -->
+                <div class="flex items-center gap-1 bg-zinc-900 rounded-full border border-zinc-800 p-1">
+                    <button onclick="changeScheduleDay(-1)" class="p-1.5 text-zinc-400 hover:text-zinc-200 transition-colors rounded-full hover:bg-zinc-800"><i data-lucide="chevron-left" class="w-4 h-4"></i></button>
+                    <button onclick="resetScheduleDay()" id="schedule-day-label" class="text-[11px] font-bold text-zinc-300 w-14 text-center uppercase tracking-wider">Today</button>
+                    <button onclick="changeScheduleDay(1)" class="p-1.5 text-zinc-400 hover:text-zinc-200 transition-colors rounded-full hover:bg-zinc-800"><i data-lucide="chevron-right" class="w-4 h-4"></i></button>
+                </div>
             </div>
             
             <div class="space-y-4 scrollable-feed" id="schedule-feed">
@@ -171,6 +180,7 @@
             </div>
         </section>
 
+        <!-- -->
         <!-- TAB 3: News -->
         <section id="tab-news" class="tab-content">
             <div class="flex items-center justify-between mb-6 px-1">
@@ -219,7 +229,7 @@
     <script>
         // --- CONSTANTS & CONFIGURATION ---
         // Your specific hardcoded Calendar URL
-        const GAS_URL = "https://script.google.com/macros/s/AKfycbwchpM8X3mEvEsshyv3uNJht_mcl9N42n6IlOW7nzFp9gkUFxgjqdkR1wNto8NJ9G7B0g/exec";
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbwDBkCnlyjQQvqYF1WVlwszNyrD6EYNaRpy6LHLACJWjy58cO_qpgJsvvdYrQm3DoiyGQ/exec";
         
         // Geolocation Data
         const LOCATIONS = {
@@ -227,6 +237,9 @@
             sp: { name: "Spanish Point", lat: 52.8465, lon: -9.4443, label: "Atlantic Coast" }
         };
         let currentLoc = 'dg'; // Default to Deansgrange
+        
+        // Calendar Offset tracking
+        let scheduleOffset = 0;
 
         // --- UTILITY FUNCTIONS ---
         // Tab Switcher
@@ -239,9 +252,10 @@
 
         // Relative Time Formatter (e.g., "2h ago")
         function timeAgo(dateString) {
+            if (!dateString) return "Recent";
             const now = new Date();
             const past = new Date(dateString.replace(/-/g, '/').replace('T', ' ').replace('Z', ' +0000'));
-            if (isNaN(past)) return "Recently";
+            if (isNaN(past)) return "Recent";
             const diff = Math.floor((now - past) / 60000); 
             if (diff < 60) return `${diff}m ago`;
             if (diff < 1440) return `${Math.floor(diff/60)}h ago`;
@@ -250,12 +264,13 @@
 
         // Strip HTML tags for clean summaries
         function stripHtml(html) {
+            if (!html) return "";
             let tmp = document.createElement("DIV");
             tmp.innerHTML = html;
-            return (tmp.textContent || tmp.innerText || "").trim();
+            let text = tmp.textContent || tmp.innerText || "";
+            return text.trim();
         }
 
-        // --- STREAMING_CHUNK: Weather & Tides Logic ---
         // Location Toggle Handler
         function toggleLocation() {
             const isChecked = document.getElementById('loc-toggle').checked;
@@ -347,8 +362,6 @@
             const currentHour = now.getHours() + (now.getMinutes() / 60);
             
             // Different tidal phases for East Coast (Dublin) vs West Coast (Clare)
-            // Dublin high tide roughly 1-2 hours offset from Clare depending on the day.
-            // (Using static offsets for visual representation)
             const peakHour = isEastCoast ? 14.5 : 16.0; 
             const period = 12.42; // Semi-diurnal tide period
             
@@ -432,36 +445,87 @@
             document.getElementById('tide-low-text').textContent = nextLowTime || "--:--";
         }
 
-        // --- STREAMING_CHUNK: Schedule Fetching (Google Apps Script) ---
-        // Fetch Calendar Events
+        function changeScheduleDay(delta) {
+            scheduleOffset += delta;
+            updateScheduleLabel();
+            fetchSchedule();
+        }
+
+        function resetScheduleDay() {
+            if (scheduleOffset === 0) return;
+            scheduleOffset = 0;
+            updateScheduleLabel();
+            fetchSchedule();
+        }
+
+        function updateScheduleLabel() {
+            const label = document.getElementById('schedule-day-label');
+            const title = document.getElementById('agenda-date-title');
+            
+            if (scheduleOffset === 0) {
+                label.textContent = "Today";
+                title.textContent = "Today's Agenda";
+                label.classList.replace('text-violet-400', 'text-zinc-300');
+            } else if (scheduleOffset === 1) {
+                label.textContent = "Tmrw";
+                title.textContent = "Tomorrow's Agenda";
+                label.classList.replace('text-zinc-300', 'text-violet-400');
+            } else if (scheduleOffset === -1) {
+                label.textContent = "Yest";
+                title.textContent = "Yesterday's Agenda";
+                label.classList.replace('text-zinc-300', 'text-violet-400');
+            } else {
+                label.textContent = `${scheduleOffset > 0 ? '+' : ''}${scheduleOffset}d`;
+                title.textContent = "Scheduled Agenda";
+                label.classList.replace('text-zinc-300', 'text-violet-400');
+            }
+        }
+
+        // Fetch Calendar Events via Proxy with Date Parameter
         async function fetchSchedule() {
             const container = document.getElementById('schedule-feed');
+            
+            // Show loading state when navigating days
+            container.innerHTML = `
+                <div class="text-center py-16 bg-zinc-900/50 rounded-[28px] border border-zinc-800/50">
+                    <i data-lucide="loader-2" class="w-8 h-8 animate-spin text-violet-500 mx-auto mb-4"></i>
+                    <p class="text-base font-semibold text-zinc-300">Syncing Calendars...</p>
+                </div>`;
+            lucide.createIcons();
+
             try {
-                // The URL is hardcoded via GAS_URL constant
-                const response = await fetch(GAS_URL);
+                // Calculate target date string YYYY-MM-DD
+                const targetDate = new Date();
+                targetDate.setDate(targetDate.getDate() + scheduleOffset);
+                const dateStr = targetDate.toISOString().split('T')[0];
+                
+                // Add the date parameter to the hardcoded URL
+                const response = await fetch(`${GAS_URL}?date=${dateStr}`);
                 if (!response.ok) throw new Error(`HTTP Error ${response.status}`);
                 
                 const data = await response.json();
                 
-                // Handle API error response
                 if (data.status === "error") throw new Error(data.message);
                 
-                // Handle empty schedule
+                // Update header date display slightly if not today
+                if (scheduleOffset !== 0 && data.dateDisplay) {
+                    document.getElementById('agenda-date-title').textContent = data.dateDisplay;
+                }
+                
                 if (!data.events || data.events.length === 0) {
                     container.innerHTML = `
                         <div class="bg-zinc-900/60 p-8 rounded-[24px] border border-zinc-800 text-center">
                             <i data-lucide="coffee" class="w-10 h-10 mx-auto text-zinc-600 mb-4"></i>
-                            <p class="text-lg font-bold text-zinc-200">No events today</p>
-                            <p class="text-sm text-zinc-500 mt-2 leading-relaxed">Your personal and family calendars are clear. Enjoy the free time!</p>
+                            <p class="text-lg font-bold text-zinc-200">No events found</p>
+                            <p class="text-sm text-zinc-500 mt-2 leading-relaxed">Your connected calendars are clear for this date. Enjoy the free time!</p>
                         </div>`;
                     lucide.createIcons();
                     return;
                 }
 
-                // Render Events
+                // Render Events with styling based on Calendar Name
                 container.innerHTML = data.events.map(ev => {
-                    // Logic to color-code different calendars
-                    let badgeColor = "bg-violet-500/20 text-violet-300 border-violet-500/30"; // Default (Personal)
+                    let badgeColor = "bg-violet-500/20 text-violet-300 border-violet-500/30"; 
                     const calName = (ev.calendarName || "").toLowerCase();
                     
                     if(calName.includes('family')) {
@@ -486,30 +550,32 @@
                 
                 lucide.createIcons();
             } catch (error) {
-                // Robust Error Display
                 container.innerHTML = `
                     <div class="bg-red-950/40 border border-red-900/60 p-6 rounded-[24px]">
                         <h4 class="text-red-400 font-bold text-base flex items-center gap-2 mb-3"><i data-lucide="alert-triangle" class="w-5 h-5"></i> Connection Error</h4>
                         <p class="text-sm text-red-300/80 font-mono bg-black/40 p-3 rounded-lg break-words mb-4">${error.message}</p>
-                        <p class="text-xs text-zinc-400 leading-relaxed">Please ensure your Google Apps Script is deployed as a "New Version" and access is set to "Anyone".</p>
                     </div>`;
                 lucide.createIcons();
-                console.error("Calendar fetch error:", error);
             }
         }
 
-        // --- STREAMING_CHUNK: RSS Feeds (News & Watch) ---
-        // Generic RSS Fetcher using rss2json proxy
-        async function fetchRSS(url) {
+        // Robust RSS Fetcher with 5-Second Timeout
+        async function fetchRSS(url, timeoutMs = 5000) {
             try {
                 const proxyUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(url)}&api_key=`;
-                const res = await fetch(proxyUrl);
+                
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+                
+                const res = await fetch(proxyUrl, { signal: controller.signal });
+                clearTimeout(timeoutId);
+                
                 const data = await res.json();
                 if(data.status === 'ok') return data.items;
                 return [];
             } catch (e) { 
-                console.error(`Failed to fetch RSS: ${url}`, e);
-                return []; 
+                console.warn(`Feed timeout or error for: ${url}`, e);
+                return []; // Fail silently and return empty array so other feeds can render
             }
         }
 
@@ -517,7 +583,6 @@
         async function loadNews() {
             const container = document.getElementById('news-feed');
             
-            // Expanded List of Premium News Sources
             const sources = [
                 { url: 'https://www.rte.ie/news/rss/news-headlines.xml', name: 'RTÉ News', style: 'bg-[#106560] text-white border-[#106560]' },
                 { url: 'http://feeds.bbci.co.uk/news/rss.xml', name: 'BBC News', style: 'bg-[#B80000] text-white border-[#B80000]' },
@@ -529,21 +594,29 @@
 
             let allArticles = [];
 
-            // Fetch all feeds concurrently
-            const results = await Promise.allSettled(sources.map(s => fetchRSS(s.url)));
+            // Fetch concurrently with Promise.all (timeouts handled individually inside fetchRSS)
+            const results = await Promise.all(sources.map(s => fetchRSS(s.url)));
             
-            results.forEach((res, index) => {
-                if(res.status === 'fulfilled' && res.value) {
+            results.forEach((items, index) => {
+                if(items && items.length > 0) {
                     const sourceInfo = sources[index];
-                    // Take top 10 from each source to build a large feed
-                    const topItems = res.value.slice(0, 10).map(item => ({
-                        ...item,
-                        sourceName: sourceInfo.name,
-                        badgeStyle: sourceInfo.style,
-                        // Clean up synopsis (remove tags and decode entities)
-                        cleanDesc: stripHtml(item.description || ""),
-                        timestamp: new Date(item.pubDate.replace(/-/g, '/')).getTime()
-                    }));
+                    // Take top 10 from each working source
+                    const topItems = items.slice(0, 10).map(item => {
+                        // Safe date parsing
+                        let ts = Date.now();
+                        if (item.pubDate) {
+                            const parsed = new Date(item.pubDate.replace(/-/g, '/'));
+                            if (!isNaN(parsed)) ts = parsed.getTime();
+                        }
+                        
+                        return {
+                            ...item,
+                            sourceName: sourceInfo.name,
+                            badgeStyle: sourceInfo.style,
+                            cleanDesc: stripHtml(item.description || ""),
+                            timestamp: ts
+                        };
+                    });
                     allArticles = allArticles.concat(topItems);
                 }
             });
@@ -555,12 +628,11 @@
                 container.innerHTML = `
                     <div class="text-center py-10 bg-zinc-900/50 rounded-3xl border border-zinc-800/50">
                         <p class="text-zinc-400 text-base font-semibold">Unable to load news feeds.</p>
-                        <p class="text-zinc-500 text-sm mt-2">Check your internet connection.</p>
+                        <p class="text-zinc-500 text-sm mt-2">Feeds may be timing out. Try again later.</p>
                     </div>`;
                 return;
             }
 
-            // Render Extensive Feed with 2-line summaries
             container.innerHTML = allArticles.map(a => `
                 <a href="${a.link}" target="_blank" class="bg-zinc-900/70 p-5 rounded-[20px] border border-zinc-800 shadow-md block transition-colors hover:bg-zinc-800/90 mb-4 group">
                     <div class="flex items-center justify-between mb-3">
@@ -573,40 +645,44 @@
             `).join('');
         }
 
-        // Load YouTube Watch Feed
+        // Load Curated YouTube Watch Feed
         async function loadYouTube() {
             const container = document.getElementById('watch-feed');
             
-            // Expanded list of YouTube Channels (Satire + Coffee/Tech)
+            // Newly Curated Channels: Comedy, Late Night, and Tech/Coffee
             const channels = [
+                { id: 'UCqFzWxSCi39LnW1ZAveBgOA', name: 'Saturday Night Live' },
+                { id: 'UCi7GJNg51C3jgmYTUwqoRVw', name: 'Team Coco' }, // Conan O'Brien
+                { id: 'UC61A3b8hB-12M6r2xQZngiw', name: 'SmartLess' }, // Jason Bateman, Will Arnett, Sean Hayes
                 { id: 'UCMb0O2CdPBNi-QqPk5T3gsQ', name: 'James Hoffmann' },
                 { id: 'UCjwpGhw0h5_1oH0R0sioeAw', name: 'Lance Hedrick' },
                 { id: 'UC0PEX_z3_18uQzQ511Y2Ogg', name: 'DC Rainmaker' },
-                { id: 'UCwWhs_6x42TyRM4Wstoq8HA', name: 'The Daily Show' },
-                { id: 'UC3XTzVzaHQEd30rQbuvCtWQ', name: 'Last Week Tonight' },
-                { id: 'UCVTyTA7-g9nopHeHbeXnvLg', name: 'Late Night Seth' },
-                { id: 'UCa6vGFO9ty8v5KZJXQxdhaw', name: 'Jimmy Kimmel Live' },
-                { id: 'UCvlj0IzjSnNoduQF0l3VGng', name: 'Some More News' }
+                { id: 'UC3XTzVzaHQEd30rQbuvCtWQ', name: 'Last Week Tonight' }
             ];
 
             let allVideos = [];
-
-            // YouTube provides built-in RSS via channel IDs
             const urls = channels.map(c => `https://www.youtube.com/feeds/videos.xml?channel_id=${c.id}`);
             
-            const results = await Promise.allSettled(urls.map(url => fetchRSS(url)));
+            const results = await Promise.all(urls.map(url => fetchRSS(url)));
             
-            results.forEach((res, index) => {
-                if(res.status === 'fulfilled' && res.value) {
+            results.forEach((items, index) => {
+                if(items && items.length > 0) {
                     const channelInfo = channels[index];
-                    // Take top 5 from each channel
-                    const topItems = res.value.slice(0, 5).map(item => ({
-                        ...item,
-                        channelName: channelInfo.name,
-                        // Attempt to extract description or set default
-                        cleanDesc: stripHtml(item.description || "Watch the latest upload on YouTube.").substring(0, 100) + '...',
-                        timestamp: new Date(item.pubDate.replace(/-/g, '/')).getTime()
-                    }));
+                    // Take top 4 recent uploads from each channel
+                    const topItems = items.slice(0, 4).map(item => {
+                        let ts = Date.now();
+                        if (item.pubDate) {
+                            const parsed = new Date(item.pubDate.replace(/-/g, '/'));
+                            if (!isNaN(parsed)) ts = parsed.getTime();
+                        }
+                        
+                        return {
+                            ...item,
+                            channelName: channelInfo.name,
+                            cleanDesc: stripHtml(item.description || "Watch the latest upload on YouTube.").substring(0, 100) + '...',
+                            timestamp: ts
+                        };
+                    });
                     allVideos = allVideos.concat(topItems);
                 }
             });
@@ -622,10 +698,9 @@
                 return;
             }
 
-            // Render Premium List View for Videos
             container.innerHTML = allVideos.map(v => `
                 <a href="${v.link}" target="_blank" class="bg-zinc-900/70 p-3.5 rounded-[20px] border border-zinc-800 shadow-md flex gap-4 group block transition-colors hover:bg-zinc-800/90 mb-4">
-                    <!-- Thumbnail -->
+                    <!-- Compact Thumbnail -->
                     <div class="relative w-36 h-24 shrink-0 bg-zinc-950 rounded-xl overflow-hidden border border-zinc-800/50 shadow-inner">
                         <img src="${v.thumbnail}" class="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity duration-300" onerror="this.src='https://placehold.co/240x160/27272a/52525b?text=Video'">
                         <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/30 backdrop-blur-sm">
@@ -649,17 +724,14 @@
             lucide.createIcons();
         }
 
-        // --- STREAMING_CHUNK: Initialization on Load ---
-        // Boot Sequence
+        // --- INITIALIZATION ---
         window.onload = () => {
-            // Set Date in Header
             const options = { weekday: 'long', month: 'long', day: 'numeric' };
             document.getElementById('date-display').textContent = new Date().toLocaleDateString('en-IE', options);
             
-            // Render basic icons
             lucide.createIcons();
             
-            // Trigger all async fetches concurrently
+            // Trigger all fetches
             fetchWeather();
             fetchSchedule();
             loadNews();
