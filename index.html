@@ -7,7 +7,6 @@
     <script src="https://cdn.tailwindcss.com"></script>
     
     <script>
-        // Dynamic Homescreen Icon Generator for iOS/Android
         (function(){
             const cvs = document.createElement('canvas');
             cvs.width = 180; cvs.height = 180;
@@ -40,25 +39,23 @@
             -webkit-tap-highlight-color: transparent; 
         }
         
-        /* Hide scrollbar but keep functionality */
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-        /* Pinned Layout constraints */
+        /* Strict Pinned Layout constraints */
         .app-container { height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
         
         .tab-content { display: none; padding-bottom: 24px; }
         .tab-content.active { display: block; animation: fadeIn 0.3s ease; }
-        
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
         
-        /* News Brand Colors */
+        /* Strict News Brand Colors */
         .brand-cnn { background: #dc2626; color: white; }
         .brand-bbc { background: #facc15; color: black; }
-        .brand-rte { background: #0ea5e9; color: white; } /* Sky Blue */
-        .brand-journal { background: #172554; color: white; } /* Deep Navy */
-        .brand-guardian { background: #1e40af; color: white; } /* Deep Blue */
-        .brand-default { background: #3f3f46; color: white; } /* Dark Gray */
+        .brand-rte { background: #0ea5e9; color: white; } 
+        .brand-journal { background: #172554; color: white; }
+        .brand-guardian { background: #1e40af; color: white; }
+        .brand-default { background: #3f3f46; color: white; }
         
         .nav-btn { color: #52525b; transition: all 0.2s; display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 11px; font-weight: 600; padding: 12px 8px; }
         .nav-btn svg { stroke: currentColor; fill: none; stroke-width: 2; width: 24px; height: 24px; }
@@ -68,13 +65,11 @@
         .pb-safe { padding-bottom: env(safe-area-inset-bottom, 20px); }
         
         .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-        .line-clamp-3 { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
     </style>
 </head>
 
 <body class="app-container max-w-md mx-auto bg-zinc-950 shadow-2xl shadow-black relative">
 
-    <!-- Sticky Header -->
     <header class="flex-none bg-zinc-950/95 backdrop-blur-md border-b border-zinc-800 p-4 px-5 flex items-center justify-between z-50">
         <div class="flex items-center gap-3">
             <svg width="40" height="40" viewBox="0 0 100 100">
@@ -95,37 +90,39 @@
         <div id="status-indicator" class="w-3 h-3 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)] transition-colors duration-300"></div>
     </header>
 
-    <!-- Scrollable Main Container -->
     <main class="flex-1 overflow-y-auto overflow-x-hidden hide-scrollbar px-4 pt-4">
         
+        <!-- Weather & Tides Tab -->
         <section id="tab-weather" class="tab-content active h-full">
             <div class="bg-zinc-900 rounded-2xl p-1.5 flex border border-zinc-800 mb-6 shrink-0">
                 <button onclick="setLoc('dg')" id="btn-dg" class="flex-1 py-3 rounded-xl font-bold text-sm bg-zinc-800 text-white shadow-sm transition-colors">Deansgrange</button>
                 <button onclick="setLoc('sp')" id="btn-sp" class="flex-1 py-3 rounded-xl font-bold text-sm text-zinc-500 transition-colors">Spanish Point</button>
             </div>
             
-            <div class="bg-zinc-900 rounded-3xl p-5 border border-zinc-800 mb-6 shadow-xl relative overflow-hidden shrink-0">
+            <div class="bg-zinc-900 rounded-3xl p-5 border border-zinc-800 mb-6 shadow-xl relative shrink-0">
                 <div class="flex gap-4 items-center">
-                    <!-- LHS: Temperatures -->
                     <div id="w-temp-box" class="w-[45%] border-r border-zinc-800 pr-4">
                         <div class="animate-pulse w-16 h-16 bg-zinc-800 rounded-full mb-2"></div>
                     </div>
-                    <!-- RHS: Synopsis & Sun -->
                     <div id="w-desc-box" class="w-[55%] pl-2">
                         <div class="text-zinc-500 text-sm">Fetching forecast...</div>
                     </div>
                 </div>
             </div>
             
-            <div id="tide-content" class="bg-zinc-900 p-6 rounded-3xl border border-zinc-800 text-white shadow-xl shrink-0">
-                <div class="flex justify-between items-start mb-4">
-                    <p class='font-bold text-xl'>Tides</p>
-                    <div id="tide-text" class="text-xs font-bold tracking-wider text-right space-y-1">
-                        <!-- High and Low injected here -->
-                    </div>
+            <div id="tide-content" class="bg-zinc-900 p-5 rounded-3xl border border-zinc-800 shadow-xl shrink-0">
+                <div class="flex justify-between items-end mb-3">
+                    <p class='font-bold text-xl text-white'>Tides</p>
+                    <div id="tide-high-text" class="text-sm font-bold text-blue-400"></div>
                 </div>
-                <div id="tide-graph-wrapper" class="w-full h-[160px] relative bg-[#0f0f13] rounded-xl overflow-hidden border border-zinc-800/50">
+                
+                <div id="tide-graph-wrapper" class="w-full h-[180px] relative bg-[#0f0f13] rounded-xl overflow-hidden border border-zinc-800/50 mb-3">
                     <!-- SVG injected via JS -->
+                </div>
+                
+                <div class="flex justify-between items-start">
+                    <div id="tide-status" class="text-xs font-bold px-2 py-1 rounded bg-zinc-800 text-white tracking-wider"></div>
+                    <div id="tide-low-text" class="text-sm font-bold text-purple-400"></div>
                 </div>
             </div>
         </section>
@@ -142,18 +139,14 @@
         </section>
 
         <section id="tab-news" class="tab-content">
-            <div class="flex justify-between items-end mb-4 px-1">
-                <h2 class="text-xl font-bold text-white tracking-tight">Top Stories</h2>
-            </div>
+            <h2 class="text-xl font-bold text-white tracking-tight mb-4 px-1">Top Stories</h2>
             <div id="news-content" class="space-y-3 pb-8">
                 <div class='text-center text-zinc-500 py-10 font-medium animate-pulse'>Aggregating global sources...</div>
             </div>
         </section>
 
         <section id="tab-watch" class="tab-content">
-            <div class="flex justify-between items-end mb-4 px-1">
-                <h2 class="text-xl font-bold text-white tracking-tight">Latest Videos</h2>
-            </div>
+            <h2 class="text-xl font-bold text-white tracking-tight mb-4 px-1">Latest Videos</h2>
             <div id="watch-content" class="space-y-4 pb-8">
                 <div class='text-center text-zinc-500 py-10 font-medium animate-pulse'>Syncing channels...</div>
             </div>
@@ -180,7 +173,6 @@
     </nav>
 
     <script>
-        // CONFIGURATION
         const CAL_URL = "https://script.google.com/macros/s/AKfycbwDBkCnlyjQQvqYF1WVlwszNyrD6EYNaRpy6LHLACJWjy58cO_qpgJsvvdYrQm3DoiyGQ/exec";
         let currentLoc = 'dg', dayOffset = 0;
 
@@ -192,11 +184,11 @@
             'https://feeds.cnn.com/rss/edition.rss'
         ];
 
-        // Expanded Watch Channel List (~30 Channels across categories)
         const WATCH_CHANNELS = [
             // Comedy / Late Night
             { id: 'UC9K540f2b_1N3y0m1l5lO2w', name: 'SNL' },
             { id: 'UCqFzWxSCi39LnW1ZAveBgOA', name: 'Team Coco' },
+            { id: 'UC0hQpeHKPEAAMY4pYgYk-fA', name: 'Letterman' },
             { id: 'UCi7GJNg51C3jgmYTUwqoRVw', name: 'SmartLess' },
             { id: 'UC3XTzVzaHQEd30rQbuvCtWQ', name: 'Last Week Tonight' },
             { id: 'UCbZ2GqPqj-7dD7S0Vn8e2kQ', name: 'Daily Show' },
@@ -204,7 +196,7 @@
             { id: 'UCMtFAi84ehTSYSE9XoHefig', name: 'Stephen Colbert' },
             { id: 'UCa6vGFO9ty8v5KZJXQxdhaw', name: 'Jimmy Kimmel' },
             { id: 'UCu2U6x65aC04p-2V675cQ3A', name: 'Off Menu' },
-            { id: 'UCxXhS_nQJEDQhWeQ4S1GvLA', name: 'Warner Bros TV' }, // ER / West Wing
+            { id: 'UCxXhS_nQJEDQhWeQ4S1GvLA', name: 'Warner Bros TV' },
             
             // Tech / Niche
             { id: 'UCMb0O2CdPBNi-QqPk5T3gsQ', name: 'James Hoffmann' },
@@ -213,44 +205,41 @@
             { id: 'UCaXgeReu2G1X7bY1483G2-A', name: 'MKBHD' },
             { id: 'UCa6RRisU52o5-n6S1X9_J3g', name: 'Linus Tech Tips' },
             { id: 'UC70xQo3a74aH4jE6qV2s0tA', name: 'TED' },
-            { id: 'UCHnyfMqiRRG1u-2MsSQLbXA', name: 'Veritasium' },
             
-            // News / Docs
+            // News / Finance
             { id: 'UCupvZgA3wgS_Pazpt52iNdg', name: 'Sky News' },
             { id: 'UCDiC215i-0C4M97W483k0bA', name: 'CNN' },
             { id: 'UC4x3eJtU22lX8_9M-2C626g', name: 'BBC News' },
             { id: 'UC_I_J8D7B2-BvIOMu1o5t3Q', name: 'RTÉ News' },
-            { id: 'UC16niRr50-MSBwiO3YDb3RA', name: 'Al Jazeera' },
-            { id: 'UCknLrEdhRCp1aegoMqRaCZg', name: 'DW News' },
             { id: 'UClzRmAESZrgQ-I-kCM6R4-Q', name: 'Vox' },
             { id: 'UCn8zNIfYAQNdrFRrr8oibKw', name: 'Vice' },
+            { id: 'UCcgqMZvAkyA-EaaZvu2n0ng', name: 'Bloomberg' },
+            { id: 'UCK7tptYoggEXpdOwRGUbmVA', name: 'WSJ' },
+            { id: 'UCvQECJukTDE2i6aCoMnS-Vg', name: 'Financial Times' },
             
             // Sports
-            { id: 'UC7jF7F_rA2J4xK6Eij92Htw', name: 'BBC Sport' },
-            { id: 'UCiWLfSweyRNmLpgEHekhoAg', name: 'ESPN FC' },
-            { id: 'UCqZQlzSHbVJrwrn5XvzrzcA', name: 'NBC Sports' }
+            { id: 'UC7jF7F_rA2J4xK6Eij92Htw', name: 'BBC Sport' }
         ];
 
         function timeAgo(dateString) {
             const date = new Date(dateString);
             const seconds = Math.floor((new Date() - date) / 1000);
-            let interval = seconds / 31536000;
-            if (interval >= 1) return Math.floor(interval) + (Math.floor(interval) === 1 ? " year ago" : " years ago");
-            interval = seconds / 2592000;
-            if (interval >= 1) return Math.floor(interval) + (Math.floor(interval) === 1 ? " month ago" : " months ago");
-            interval = seconds / 86400;
-            if (interval >= 1) return Math.floor(interval) + (Math.floor(interval) === 1 ? " day ago" : " days ago");
-            interval = seconds / 3600;
-            if (interval >= 1) return Math.floor(interval) + (Math.floor(interval) === 1 ? " hour ago" : " hours ago");
-            interval = seconds / 60;
-            if (interval >= 1) return Math.floor(interval) + (Math.floor(interval) === 1 ? " min ago" : " mins ago");
+            let interval = Math.floor(seconds / 31536000);
+            if (interval >= 1) return interval === 1 ? "1 year ago" : `${interval} years ago`;
+            interval = Math.floor(seconds / 2592000);
+            if (interval >= 1) return interval === 1 ? "1 month ago" : `${interval} months ago`;
+            interval = Math.floor(seconds / 86400);
+            if (interval >= 1) return interval === 1 ? "1 day ago" : `${interval} days ago`;
+            interval = Math.floor(seconds / 3600);
+            if (interval >= 1) return interval === 1 ? "1 hour ago" : `${interval} hours ago`;
+            interval = Math.floor(seconds / 60);
+            if (interval >= 1) return interval === 1 ? "1 min ago" : `${interval} mins ago`;
             return "Just now";
         }
 
         function extractSummary(htmlString) {
             const doc = new DOMParser().parseFromString(htmlString, 'text/html');
-            const text = doc.body.textContent || "";
-            return text.replace(/\s+/g, ' ').trim().substring(0, 100) + '...';
+            return (doc.body.textContent || "").replace(/\s+/g, ' ').trim().substring(0, 95) + '...';
         }
 
         function formatTime(isoString) {
@@ -269,8 +258,6 @@
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
             document.getElementById('tab-' + id).classList.add('active');
             btn.classList.add('active');
-            
-            // Auto scroll to top of main area when switching tabs
             document.querySelector('main').scrollTop = 0;
         }
 
@@ -325,7 +312,6 @@
 
         function changeDay(delta) { dayOffset += delta; fetchSched(); }
         function resetDay() { dayOffset = 0; fetchSched(); }
-
         function setLoc(loc) {
             currentLoc = loc;
             document.getElementById('btn-dg').className = loc === 'dg' ? 'flex-1 py-3 rounded-xl font-bold text-sm bg-zinc-800 text-white shadow-sm transition-colors' : 'flex-1 py-3 rounded-xl font-bold text-sm text-zinc-500 transition-colors';
@@ -378,15 +364,15 @@
                     </div>
                 `;
 
-                // Tide Graph Render
+                // Tide Graph Render (Enhanced with Current Time Marker & Axis)
                 const width = 1000;
-                const height = 160;
+                const height = 180;
                 let pathD = `M 0 ${height} `;
                 
-                // Doubled amplitude (100) and 2 full cycles for steeper, wavier look
-                const amp = 80; 
+                const amp = 85; 
                 const offset = currentLoc === 'dg' ? 0 : Math.PI; 
-
+                
+                // Draw wave path
                 for (let i = 0; i <= width; i += 10) {
                     const x = i;
                     const y = (height / 2) + amp * Math.sin((i / width) * Math.PI * 4 + offset);
@@ -394,20 +380,45 @@
                 }
                 pathD += `L ${width} ${height} Z`;
 
-                const highText = currentLoc === 'dg' ? '14:30' : '15:10';
-                const lowText = currentLoc === 'dg' ? '20:15' : '21:00';
+                // Current Time Logic
+                const now = new Date();
+                const currentHour = now.getHours() + (now.getMinutes() / 60);
+                const xPos = (currentHour / 24) * width;
+                const currentY = (height / 2) + amp * Math.sin((currentHour / 24) * Math.PI * 4 + offset);
+                
+                // Derivative check for rising vs falling
+                const slope = Math.cos((currentHour / 24) * Math.PI * 4 + offset);
+                const isRising = slope < 0; // inverted Y-axis logic in SVG
+                const statusColor = isRising ? '#10b981' : '#ef4444'; 
+                const statusText = isRising ? '▲ Tide is Rising' : '▼ Tide is Falling';
 
                 document.getElementById('tide-graph-wrapper').innerHTML = `
-                    <svg viewBox="0 0 1000 160" class="w-full h-full" preserveAspectRatio="none">
+                    <svg viewBox="0 0 1000 180" class="w-full h-full absolute inset-0" preserveAspectRatio="none">
+                        <!-- X-Axis Line -->
+                        <line x1="0" y1="165" x2="1000" y2="165" stroke="#27272a" stroke-width="2" />
+                        
+                        <!-- Hour Markers -->
+                        <text x="10" y="178" fill="#52525b" font-size="14" font-weight="bold">00:00</text>
+                        <text x="230" y="178" fill="#52525b" font-size="14" font-weight="bold">06:00</text>
+                        <text x="480" y="178" fill="#52525b" font-size="14" font-weight="bold">12:00</text>
+                        <text x="730" y="178" fill="#52525b" font-size="14" font-weight="bold">18:00</text>
+                        <text x="940" y="178" fill="#52525b" font-size="14" font-weight="bold">24:00</text>
+
+                        <!-- The Wave -->
                         <path class="tide-wave" d="${pathD}" />
+                        
+                        <!-- Current Time Indicator -->
+                        <line x1="${xPos}" y1="0" x2="${xPos}" y2="165" stroke="${statusColor}" stroke-width="4" stroke-dasharray="8,8" />
+                        <circle cx="${xPos}" cy="${currentY}" r="8" fill="${statusColor}" stroke="#18181b" stroke-width="3" />
                     </svg>
                 `;
                 
-                // High first, then low, on separate lines
-                document.getElementById('tide-text').innerHTML = `
-                    <div class="text-blue-400">▲ High: ${highText}</div>
-                    <div class="text-accent mt-1">▼ Low: ${lowText}</div>
-                `;
+                document.getElementById('tide-high-text').innerText = currentLoc === 'dg' ? '▲ High: 14:30' : '▲ High: 15:10';
+                document.getElementById('tide-low-text').innerText = currentLoc === 'dg' ? '▼ Low: 20:15' : '▼ Low: 21:00';
+                
+                const statusEl = document.getElementById('tide-status');
+                statusEl.innerText = statusText;
+                statusEl.className = `text-xs font-bold px-2 py-1 rounded tracking-wider ${isRising ? 'bg-emerald-950/50 text-emerald-400 border border-emerald-900' : 'bg-red-950/50 text-red-400 border border-red-900'}`;
 
             } catch(e) { 
                 document.getElementById('w-temp-box').innerHTML = "<div class='text-red-500 py-4 text-sm'>Error</div>"; 
@@ -418,18 +429,17 @@
             const newsEl = document.getElementById('news-content');
             
             try {
-                const fetchWithTimeout = (url, timeout = 5000) => Promise.race([
+                const fetchWithTimeout = (url, timeout = 6000) => Promise.race([
                     fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(url)}`).then(r => r.json()),
                     new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), timeout))
                 ]);
 
                 const results = await Promise.allSettled(NEWS_FEEDS.map(f => fetchWithTimeout(f)));
                 
-                // Aggregate all feeds before sorting
                 const all = results
                     .filter(r => r.status === 'fulfilled' && r.value.items)
                     .flatMap(r => r.value.items)
-                    .sort((a,b) => new Date(b.pubDate) - new Date(a.pubDate)); // Global recency sort
+                    .sort((a,b) => new Date(b.pubDate) - new Date(a.pubDate)); 
                 
                 if(all.length === 0) throw new Error();
                 
@@ -437,12 +447,11 @@
                     const link = (i.link || "").toLowerCase();
                     const srcName = i.source || (link.includes('bbc') ? 'BBC News' : link.includes('rte') ? 'RTÉ News' : link.includes('thejournal') ? 'The Journal' : link.includes('cnn') ? 'CNN' : link.includes('guardian') ? 'The Guardian' : 'News');
                     
-                    // Smart Branding Map
                     let brandClass = 'brand-default';
                     let brandLetter = srcName.charAt(0).toUpperCase();
                     
-                    if (link.includes('cnn')) brandClass = 'brand-cnn';
-                    else if (link.includes('bbc')) brandClass = 'brand-bbc';
+                    if (link.includes('cnn')) { brandClass = 'brand-cnn'; brandLetter = 'C'; }
+                    else if (link.includes('bbc')) { brandClass = 'brand-bbc'; brandLetter = 'B'; }
                     else if (link.includes('rte')) { brandClass = 'brand-rte'; brandLetter = 'R'; }
                     else if (link.includes('thejournal')) { brandClass = 'brand-journal'; brandLetter = 'J'; }
                     else if (link.includes('guardian')) { brandClass = 'brand-guardian'; brandLetter = 'G'; }
@@ -471,7 +480,6 @@
             
             try {
                 const fetchChan = async (ch) => {
-                    // Timeout wrapper for each channel
                     const controller = new AbortController();
                     const timeoutId = setTimeout(() => controller.abort(), 6000);
                     try {
@@ -480,17 +488,16 @@
                         clearTimeout(timeoutId);
                         return (data.items || []).map(v => ({ ...v, author: ch.name }));
                     } catch(e) {
-                        return []; // Graceful fail for single channel
+                        return []; 
                     }
                 };
 
-                // allSettled ensures one broken feed doesn't ruin the whole tab
                 const results = await Promise.allSettled(WATCH_CHANNELS.map(ch => fetchChan(ch)));
                 
                 const videos = results
                     .filter(r => r.status === 'fulfilled')
                     .flatMap(r => r.value)
-                    .sort((a,b) => new Date(b.pubDate) - new Date(a.pubDate)); // Global recency sort
+                    .sort((a,b) => new Date(b.pubDate) - new Date(a.pubDate)); 
                 
                 if(videos.length === 0) throw new Error();
                 
