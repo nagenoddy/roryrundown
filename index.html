@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Rise Rundown Dashboard</title>
     
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0%25' stop-color='%23f59e0b'/%3E%3Cstop offset='100%25' stop-color='%238b5cf6'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='100' height='100' rx='22' fill='%2318181b'/%3E%3Ccircle cx='50' cy='50' r='30' fill='url(%23g)'/%3E%3C/svg%3E">
@@ -17,7 +17,6 @@
             --text: #f3f4f6; 
             --accent: #8b5cf6; 
             --border: #27272a; 
-            --emerald: #10b981;
         }
         body { 
             background: var(--bg); 
@@ -26,73 +25,55 @@
             -webkit-tap-highlight-color: transparent; 
         }
         
-        .sticky-header { 
-            position: sticky; 
-            top: 0; 
-            z-index: 1000; 
-            background: rgba(9, 9, 11, 0.95); 
-            backdrop-filter: blur(12px); 
-            border-bottom: 1px solid var(--border); 
-            padding: 16px 20px; 
-            display: flex; 
-            align-items: center; 
-            justify-content: space-between; 
-        }
+        /* Hide scrollbar for main content area but keep functionality */
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        .tab-content { display: none; padding-top: 8px; padding-bottom: 24px; }
+        .tab-content.active { display: block; animation: fadeIn 0.3s ease; }
         
-        .tab-content { display: none; padding-top: 10px; padding-bottom: 120px; }
-        .tab-content.active { display: block; }
-        
-        .nav-container { 
-            position: fixed; bottom: 0; width: 100%; max-width: 448px; 
-            background: rgba(9, 9, 11, 0.98); border-top: 1px solid var(--border); 
-            padding: 12px 10px; display: flex; justify-content: space-between; z-index: 2000; 
-        }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
         
         .nav-btn { 
             color: #52525b; transition: all 0.2s; display: flex; flex-direction: column; 
-            align-items: center; gap: 6px; font-size: 11px; font-weight: 600; 
-            padding: 8px 12px; border-radius: 12px;
+            align-items: center; gap: 4px; font-size: 11px; font-weight: 600; 
+            padding: 8px; flex: 1; border-radius: 12px;
         }
-        .nav-btn svg { width: 24px; height: 24px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+        .nav-btn svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
         .nav-btn.active { color: var(--accent); }
         .nav-btn.active svg { stroke: var(--accent); }
 
-        .sched-nav { display: flex; align-items: center; justify-content: center; gap: 16px; padding: 24px 0; }
-        
+        .sched-nav { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 0 24px 0; }
         .btn-nav-day { 
-            font-size: 1.5rem; font-weight: 800; min-width: 64px; height: 64px; 
+            font-size: 1.25rem; font-weight: 800; width: 60px; height: 60px; 
             display: flex; align-items: center; justify-content: center; 
             border-radius: 20px; background: var(--card); color: white; 
-            border: 2px solid var(--border); transition: all 0.2s; cursor: pointer;
+            border: 2px solid var(--border); transition: all 0.2s; cursor: pointer; flex-shrink: 0;
         }
         .btn-nav-day:active { background: #3f3f46; transform: scale(0.95); border-color: var(--accent); }
-        
         .day-label { 
-            font-weight: 800; font-size: 1.35rem; color: white; min-width: 130px; 
+            font-weight: 800; font-size: 1.25rem; color: white; flex-grow: 1;
             text-align: center; text-transform: uppercase; letter-spacing: 0.05em; 
-            background: transparent; border: none; cursor: pointer; height: 64px;
+            background: var(--card); border: 2px solid var(--border); border-radius: 20px; 
+            cursor: pointer; height: 60px; display: flex; align-items: center; justify-content: center;
         }
+        .day-label:active { background: #27272a; }
 
         .item-card { 
             background: var(--card); padding: 16px; border-radius: 20px; 
-            border: 1px solid var(--border); margin-bottom: 16px; display: flex; gap: 16px; align-items: center; 
+            border: 1px solid var(--border); margin-bottom: 12px; display: flex; gap: 14px; align-items: flex-start; 
         }
 
         .news-brand-badge {
-            width: 48px; height: 48px; border-radius: 12px; flex-shrink: 0;
+            width: 44px; height: 44px; border-radius: 12px; flex-shrink: 0;
             display: flex; align-items: center; justify-content: center;
-            font-weight: 800; font-size: 1.2rem; border: 1px solid rgba(255,255,255,0.1);
-        }
-        
-        .video-item { 
-            display: flex; gap: 16px; padding: 16px; background: var(--card); 
-            border-radius: 16px; margin-bottom: 12px; align-items: flex-start; 
-            border: 1px solid var(--border); 
+            font-weight: 800; font-size: 1.2rem; box-shadow: inset 0 0 0 1px rgba(255,255,255,0.1);
         }
         
         .video-thumb { 
-            width: 110px; height: 80px; background: #27272a; 
-            border-radius: 8px; flex-shrink: 0; object-fit: cover; 
+            width: 120px; height: 75px; background: #27272a; 
+            border-radius: 10px; flex-shrink: 0; object-fit: cover; 
+            box-shadow: inset 0 0 0 1px rgba(255,255,255,0.1);
         }
 
         .line-clamp-2 {
@@ -102,54 +83,68 @@
         #status-indicator { transition: background 0.3s ease, box-shadow 0.3s ease; }
         
         .tide-graph-container {
-            width: 100%; height: 120px; margin-top: 16px; position: relative;
+            width: 100%; height: 140px; margin-top: 16px; position: relative;
         }
-        .tide-wave { fill: rgba(139, 92, 246, 0.15); stroke: var(--accent); stroke-width: 3; }
-        .tide-label { font-size: 11px; fill: #a1a1aa; font-weight: 600; }
+        .tide-wave { fill: rgba(139, 92, 246, 0.15); stroke: var(--accent); stroke-width: 4; }
         .tide-point { fill: var(--text); }
+        .pb-safe { padding-bottom: env(safe-area-inset-bottom, 20px); }
     </style>
 </head>
-<body class="max-w-md mx-auto min-h-screen relative shadow-2xl shadow-black">
 
-    <header class="sticky-header">
-        <div class="flex items-center gap-4">
-            <svg width="45" height="45" viewBox="0 0 100 100">
+<body class="max-w-md mx-auto h-[100dvh] flex flex-col bg-zinc-950 text-zinc-100 shadow-2xl shadow-black relative overflow-hidden">
+
+    <!-- Header: Pinned to Top -->
+    <header class="flex-none bg-zinc-950/95 backdrop-blur-md border-b border-zinc-800 p-4 px-5 flex items-center justify-between z-50">
+        <div class="flex items-center gap-3">
+            <svg width="40" height="40" viewBox="0 0 100 100">
                 <defs>
-                    <linearGradient id='grad' x1='0' y1='0' x2='1' y2='1'>
+                    <linearGradient id='gradHead' x1='0' y1='0' x2='1' y2='1'>
                         <stop offset='0%' stop-color='#f59e0b'/>
                         <stop offset='100%' stop-color='#8b5cf6'/>
                     </linearGradient>
                 </defs>
                 <rect width='100' height='100' rx='22' fill='#18181b'/>
-                <circle cx='50' cy='50' r='30' fill='url(#grad)'/>
+                <circle cx='50' cy='50' r='30' fill='url(#gradHead)'/>
             </svg>
             <div>
-                <h1 class="text-2xl font-bold text-white tracking-tight">Rise</h1>
-                <p id="date-display" class="text-sm text-zinc-400 font-medium"></p>
+                <h1 class="text-xl font-bold text-white tracking-tight leading-none">Rise</h1>
+                <p id="date-display" class="text-[11px] text-zinc-400 font-bold uppercase tracking-wider mt-1"></p>
             </div>
         </div>
         <div id="status-indicator" class="w-3 h-3 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]"></div>
     </header>
 
-    <main class="px-4 pb-20 pt-4">
+    <!-- Main Content: Scrollable Area -->
+    <main class="flex-1 overflow-y-auto overflow-x-hidden hide-scrollbar px-4 pt-4 pb-8">
         
         <section id="tab-weather" class="tab-content active">
-            <div class="bg-zinc-900 rounded-2xl p-2 flex border border-zinc-800 mb-6">
-                <button onclick="setLoc('dg')" id="btn-dg" class="flex-1 py-3 rounded-xl font-bold text-lg bg-zinc-700 text-white">Deansgrange</button>
-                <button onclick="setLoc('sp')" id="btn-sp" class="flex-1 py-3 rounded-xl font-bold text-lg text-zinc-500">Spanish Point</button>
+            <div class="bg-zinc-900 rounded-2xl p-1.5 flex border border-zinc-800 mb-6">
+                <button onclick="setLoc('dg')" id="btn-dg" class="flex-1 py-3 rounded-xl font-bold text-sm bg-zinc-800 text-white transition-all shadow-sm">Deansgrange</button>
+                <button onclick="setLoc('sp')" id="btn-sp" class="flex-1 py-3 rounded-xl font-bold text-sm text-zinc-500 transition-all">Spanish Point</button>
             </div>
             
-            <div id="w-content" class="bg-zinc-900 p-8 rounded-3xl border border-zinc-800 mb-6 text-center text-white flex flex-col items-center">
-                <div class="animate-pulse w-16 h-16 bg-zinc-800 rounded-full mb-4"></div>
-                <div class="text-zinc-500">Fetching Weather...</div>
-            </div>
-            
-            <div id="tide-content" class="bg-zinc-900 p-6 rounded-3xl border border-zinc-800 text-center text-white">
-                <p class='font-bold text-xl mb-1 text-left px-2'>Tide Forecast</p>
-                <div id="tide-graph-wrapper" class="tide-graph-container">
-                    <!-- Graph injected via JS -->
+            <!-- Dashboard Weather Card -->
+            <div class="bg-zinc-900 rounded-3xl p-5 border border-zinc-800 mb-6 shadow-xl relative overflow-hidden">
+                <div class="absolute top-0 right-0 w-32 h-32 bg-accent opacity-5 rounded-bl-full pointer-events-none"></div>
+                <div class="flex gap-4 items-center">
+                    <div id="w-temp-box" class="w-[45%] border-r border-zinc-800 pr-4">
+                        <div class="animate-pulse w-16 h-16 bg-zinc-800 rounded-full mb-2"></div>
+                    </div>
+                    <div id="w-desc-box" class="w-[55%] pl-2">
+                        <div class="text-zinc-500 text-sm">Fetching forecast...</div>
+                    </div>
                 </div>
-                <div id="tide-text" class="text-sm text-zinc-400 mt-2 font-medium flex justify-between px-2"></div>
+            </div>
+            
+            <!-- Dashboard Tide Card -->
+            <div id="tide-content" class="bg-zinc-900 p-6 rounded-3xl border border-zinc-800 text-white shadow-xl">
+                <div class="flex justify-between items-end mb-2">
+                    <p class='font-bold text-xl'>Tide Forecast</p>
+                    <p id="tide-text" class="text-[11px] font-bold uppercase tracking-wider text-accent"></p>
+                </div>
+                <div id="tide-graph-wrapper" class="tide-graph-container">
+                    <!-- SVG injected via JS -->
+                </div>
             </div>
         </section>
 
@@ -159,31 +154,32 @@
                 <button onclick="resetDay()" id="day-label" class="day-label">Today</button>
                 <button onclick="changeDay(1)" class="btn-nav-day">▶</button>
             </div>
-            <div id="sched-content" class="space-y-4">
-                <div class='text-center text-zinc-500 py-10'>Loading Calendar...</div>
+            <div id="sched-content" class="space-y-3">
+                <div class='text-center text-zinc-500 py-10 font-medium'>Loading Calendar...</div>
             </div>
         </section>
 
         <section id="tab-news" class="tab-content">
             <div class="flex justify-between items-end mb-4 px-1">
-                <h2 class="text-xl font-bold text-white">Top Stories</h2>
+                <h2 class="text-xl font-bold text-white tracking-tight">Top Stories</h2>
             </div>
-            <div id="news-content" class="space-y-4">
-                <div class='text-center text-zinc-500 py-10'>Fetching global articles...</div>
+            <div id="news-content" class="space-y-0">
+                <div class='text-center text-zinc-500 py-10 font-medium'>Aggregating global sources...</div>
             </div>
         </section>
 
         <section id="tab-watch" class="tab-content">
             <div class="flex justify-between items-end mb-4 px-1">
-                <h2 class="text-xl font-bold text-white">Latest Videos</h2>
+                <h2 class="text-xl font-bold text-white tracking-tight">Latest Videos</h2>
             </div>
-            <div id="watch-content" class="space-y-4">
-                <div class='text-center text-zinc-500 py-10'>Syncing all channels...</div>
+            <div id="watch-content" class="space-y-0">
+                <div class='text-center text-zinc-500 py-10 font-medium'>Syncing channels...</div>
             </div>
         </section>
     </main>
 
-    <nav class="nav-container left-1/2 -translate-x-1/2">
+    <!-- Navigation: Pinned to Bottom -->
+    <nav class="flex-none bg-zinc-950/98 backdrop-blur-xl border-t border-zinc-800 flex justify-between px-2 pt-2 pb-safe z-50">
         <button onclick="switchTab('weather', this)" class="nav-btn active">
             <svg viewBox="0 0 24 24"><path d="M17.5 19C19.9853 19 22 16.9853 22 14.5C22 12.1332 20.1818 10.2016 17.8596 10.021C17.4103 6.64333 14.5218 4 11 4C7.13401 4 4 7.13401 4 11C4 11.2374 4.01183 11.472 4.03478 11.7032C2.29828 12.3596 1 14.0253 1 16C1 18.2091 2.79086 20 5 20H17.5Z"/></svg>
             Weather
@@ -197,7 +193,7 @@
             News
         </button>
         <button onclick="switchTab('watch', this)" class="nav-btn">
-            <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><path d="M10 8l6 3-6 3V8z"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+            <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><polygon points="10 8 16 12 10 16 10 8"/><line x1="8" y1="21" x2="16" y2="21"/></svg>
             Watch
         </button>
     </nav>
@@ -215,14 +211,17 @@
             'https://feeds.cnn.com/rss/edition.rss'
         ];
 
-        // Expanded Channel List
+        // Expanded Channel List combining Tech, Comedy, and Classic Shows
         const WATCH_CHANNELS = [
             { id: 'UC9K540f2b_1N3y0m1l5lO2w', name: 'SNL' },
             { id: 'UCqFzWxSCi39LnW1ZAveBgOA', name: 'Team Coco' },
             { id: 'UCi7GJNg51C3jgmYTUwqoRVw', name: 'SmartLess' },
             { id: 'UC3XTzVzaHQEd30rQbuvCtWQ', name: 'Last Week Tonight' },
             { id: 'UCbZ2GqPqj-7dD7S0Vn8e2kQ', name: 'Daily Show' },
-            { id: 'UC8-Th83bH_thdKZDJCrn88g', name: 'Seth Meyers' }, // Late Night
+            { id: 'UC8-Th83bH_thdKZDJCrn88g', name: 'Seth Meyers' }, 
+            { id: 'UCMtFAi84ehTSYSE9XoHefig', name: 'Stephen Colbert' },
+            { id: 'UCa6vGFO9ty8v5KZJXQxdhaw', name: 'Jimmy Kimmel' },
+            { id: 'UCxXhS_nQJEDQhWeQ4S1GvLA', name: 'Warner Bros TV' }, // Serves ER / West Wing highlights
             { id: 'UCu2U6x65aC04p-2V675cQ3A', name: 'Off Menu' },
             { id: 'UCMb0O2CdPBNi-QqPk5T3gsQ', name: 'James Hoffmann' },
             { id: 'UCjwpGhw0h5_1oH0R0sioeAw', name: 'Lance Hedrick' },
@@ -235,32 +234,42 @@
             const date = new Date(dateString);
             const seconds = Math.floor((new Date() - date) / 1000);
             let interval = seconds / 31536000;
-            if (interval > 1) return Math.floor(interval) + " years ago";
+            if (interval > 1) return Math.floor(interval) + (Math.floor(interval) === 1 ? " year ago" : " years ago");
             interval = seconds / 2592000;
-            if (interval > 1) return Math.floor(interval) + " months ago";
+            if (interval > 1) return Math.floor(interval) + (Math.floor(interval) === 1 ? " month ago" : " months ago");
             interval = seconds / 86400;
-            if (interval > 1) return Math.floor(interval) + " days ago";
+            if (interval > 1) return Math.floor(interval) + (Math.floor(interval) === 1 ? " day ago" : " days ago");
             interval = seconds / 3600;
-            if (interval > 1) return Math.floor(interval) + " hours ago";
+            if (interval > 1) return Math.floor(interval) + (Math.floor(interval) === 1 ? " hour ago" : " hours ago");
             interval = seconds / 60;
-            if (interval > 1) return Math.floor(interval) + " mins ago";
-            return Math.floor(seconds) + " seconds ago";
+            if (interval > 1) return Math.floor(interval) + (Math.floor(interval) === 1 ? " min ago" : " mins ago");
+            return "Just now";
         }
 
         function getBrandIdentity(sourceName) {
             const src = sourceName.toLowerCase();
-            if (src.includes('cnn')) return 'bg-red-600 text-white border-red-800';
-            if (src.includes('bbc')) return 'bg-yellow-400 text-black border-yellow-600';
-            if (src.includes('journal')) return 'bg-blue-600 text-white border-blue-800';
-            if (src.includes('rté') || src.includes('rte')) return 'bg-emerald-800 text-white border-emerald-900';
-            if (src.includes('guardian')) return 'bg-blue-900 text-white border-blue-950';
-            return 'bg-zinc-700 text-white border-zinc-600'; // Default
+            if (src.includes('cnn')) return 'bg-red-600 text-white';
+            if (src.includes('bbc')) return 'bg-yellow-400 text-black';
+            if (src.includes('journal')) return 'bg-blue-600 text-white';
+            if (src.includes('rté') || src.includes('rte')) return 'bg-emerald-600 text-white';
+            if (src.includes('guardian')) return 'bg-blue-900 text-white';
+            return 'bg-zinc-700 text-white'; // Default Fallback
         }
 
         function extractSummary(htmlString) {
             const doc = new DOMParser().parseFromString(htmlString, 'text/html');
             const text = doc.body.textContent || "";
-            return text.replace(/\s+/g, ' ').trim().substring(0, 90) + '...';
+            return text.replace(/\s+/g, ' ').trim().substring(0, 85) + '...';
+        }
+
+        function formatTime(isoString) {
+            const d = new Date(isoString);
+            let h = d.getHours();
+            let m = d.getMinutes();
+            const ampm = h >= 12 ? 'PM' : 'AM';
+            h = h % 12 || 12;
+            m = m < 10 ? '0' + m : m;
+            return `${h}:${m} ${ampm}`;
         }
 
         function switchTab(id, btn) {
@@ -268,6 +277,9 @@
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
             document.getElementById('tab-' + id).classList.add('active');
             btn.classList.add('active');
+            
+            // Auto scroll to top of main area when switching tabs
+            document.querySelector('main').scrollTop = 0;
         }
 
         async function fetchSched() {
@@ -279,12 +291,12 @@
             document.getElementById('day-label').innerText = display;
             const content = document.getElementById('sched-content');
             
-            content.innerHTML = "<div class='text-center text-zinc-500 py-10'>Syncing Calendar...</div>";
+            content.innerHTML = "<div class='text-center text-zinc-500 py-10 animate-pulse'>Syncing Calendar...</div>";
             document.getElementById('status-indicator').className = "w-3 h-3 rounded-full bg-amber-500 shadow-[0_0_10px_rgba(245,158,11,0.5)]";
 
             try {
                 const controller = new AbortController();
-                const id = setTimeout(() => controller.abort(), 6000);
+                const id = setTimeout(() => controller.abort(), 8000);
                 const res = await fetch(`${CAL_URL}?date=${dStr}`, { signal: controller.signal });
                 const data = await res.json();
                 clearTimeout(id);
@@ -295,9 +307,10 @@
                     content.innerHTML = data.events.map(e => `
                         <div class='item-card'>
                             <div class="flex-1">
-                                <p class='font-bold text-xl text-white'>${e.title}</p>
-                                <p class='text-md text-zinc-400 mt-1 font-medium'>
-                                    <span class="text-accent">${e.time}</span> • ${e.calendarName}
+                                <p class='font-bold text-[17px] text-white leading-snug'>${e.title}</p>
+                                <p class='text-sm text-zinc-400 mt-1.5 font-medium flex items-center gap-2'>
+                                    <span class="bg-zinc-800 text-accent px-2 py-0.5 rounded text-xs tracking-wide">${e.time}</span>
+                                    <span>${e.calendarName}</span>
                                 </p>
                             </div>
                         </div>
@@ -318,32 +331,32 @@
 
         function setLoc(loc) {
             currentLoc = loc;
-            document.getElementById('btn-dg').className = loc === 'dg' ? 'flex-1 py-3 rounded-xl font-bold text-lg bg-zinc-700 text-white transition-colors' : 'flex-1 py-3 rounded-xl font-bold text-lg text-zinc-500 transition-colors';
-            document.getElementById('btn-sp').className = loc === 'sp' ? 'flex-1 py-3 rounded-xl font-bold text-lg bg-zinc-700 text-white transition-colors' : 'flex-1 py-3 rounded-xl font-bold text-lg text-zinc-500 transition-colors';
+            document.getElementById('btn-dg').className = loc === 'dg' ? 'flex-1 py-3 rounded-xl font-bold text-sm bg-zinc-800 text-white transition-all shadow-sm' : 'flex-1 py-3 rounded-xl font-bold text-sm text-zinc-500 transition-all';
+            document.getElementById('btn-sp').className = loc === 'sp' ? 'flex-1 py-3 rounded-xl font-bold text-sm bg-zinc-800 text-white transition-all shadow-sm' : 'flex-1 py-3 rounded-xl font-bold text-sm text-zinc-500 transition-all';
             loadWeather();
         }
 
         function getWeatherSynopsis(code) {
-            if (code <= 1) return "Clear & Bright ☀️";
-            if (code <= 3) return "Partly Cloudy ⛅";
-            if (code <= 48) return "Foggy 🌫️";
-            if (code <= 67) return "Rain Expected 🌧️";
-            if (code <= 77) return "Snow Showers ❄️";
-            return "Stormy ⛈️";
+            if (code <= 1) return "Bright and clear skies today.";
+            if (code <= 3) return "Sunny spells mixed with partial cloud cover.";
+            if (code <= 48) return "Foggy conditions reducing visibility.";
+            if (code <= 55) return "Light drizzle expected throughout the day.";
+            if (code <= 65) return "Steady rain. Keep an umbrella handy.";
+            if (code <= 77) return "Snow showers likely in certain areas.";
+            if (code <= 82) return "Heavy rain showers moving through.";
+            return "Stormy and unsettled conditions.";
         }
 
         function renderTideGraph(isDG) {
-            // Generating a visual sine wave path
             const width = 1000;
-            const height = 120;
+            const height = 140;
             let pathD = `M 0 ${height} `;
             
-            // Spanish Point has higher amplitude, Deansgrange is flatter in our mock visual
-            const amp = isDG ? 30 : 45; 
-            const offset = isDG ? 0 : Math.PI; // Shift phase slightly
+            // Dramatic amplitude to make the waves look tall and impactful
+            const amp = isDG ? 55 : 65; 
+            const offset = isDG ? 0 : Math.PI; 
 
             for (let i = 0; i <= width; i += 10) {
-                // Map i to a full sine wave cycle
                 const x = i;
                 const y = (height / 2) + amp * Math.sin((i / width) * Math.PI * 2 + offset);
                 pathD += `L ${x} ${y} `;
@@ -354,32 +367,48 @@
             const lowText = isDG ? 'Low: 20:15' : 'Low: 21:00';
 
             document.getElementById('tide-graph-wrapper').innerHTML = `
-                <svg viewBox="0 0 1000 120" class="w-full h-full rounded-xl overflow-hidden bg-[#0f0f13]">
+                <svg viewBox="0 0 1000 140" class="w-full h-full rounded-xl overflow-hidden bg-[#0f0f13] border border-zinc-800/50">
                     <path class="tide-wave" d="${pathD}" />
-                    <circle cx="500" cy="${(height / 2) + amp * Math.sin(Math.PI + offset)}" r="6" class="tide-point" />
+                    <!-- Visual marker for current approximate time (mocked center) -->
+                    <circle cx="500" cy="${(height / 2) + amp * Math.sin(Math.PI + offset)}" r="8" class="tide-point" stroke="rgba(139, 92, 246, 0.5)" stroke-width="4"/>
                 </svg>
             `;
-            document.getElementById('tide-text').innerHTML = `<span>↓ ${lowText}</span><span>↑ ${highText}</span>`;
+            document.getElementById('tide-text').innerHTML = `<span class="mr-3">▼ ${lowText}</span><span>▲ ${highText}</span>`;
         }
 
         async function loadWeather() {
             const lat = currentLoc === 'dg' ? 53.28 : 52.85;
             const lon = currentLoc === 'dg' ? -6.15 : -9.53;
             try {
-                const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=temperature_2m_max,temperature_2m_min,weathercode&current=temperature_2m,weathercode`);
+                // Fetch daily extremes, current temp, weather code, and sunrise/sunset
+                const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=temperature_2m_max,temperature_2m_min,weathercode,sunrise,sunset&current=temperature_2m,weathercode&timezone=auto`);
                 const data = await res.json();
-                const synopsis = getWeatherSynopsis(data.current.weathercode);
                 
-                document.getElementById('w-content').innerHTML = `
-                    <div class='text-7xl font-black text-white tracking-tighter'>${Math.round(data.current.temperature_2m)}°</div>
-                    <div class='text-lg font-semibold text-accent mt-2'>${synopsis}</div>
-                    <div class='text-md text-zinc-400 mt-2 font-medium bg-zinc-800/50 px-4 py-2 rounded-full'>
-                        H: ${Math.round(data.daily.temperature_2m_max[0])}° &nbsp;•&nbsp; L: ${Math.round(data.daily.temperature_2m_min[0])}°
+                const synopsis = getWeatherSynopsis(data.daily.weathercode[0] || data.current.weathercode);
+                const riseTime = formatTime(data.daily.sunrise[0]);
+                const setTime = formatTime(data.daily.sunset[0]);
+                
+                document.getElementById('w-temp-box').innerHTML = `
+                    <div class='text-6xl font-black text-white tracking-tighter'>${Math.round(data.current.temperature_2m)}°</div>
+                    <div class='text-xs font-bold text-zinc-400 mt-2 tracking-wide'>H: ${Math.round(data.daily.temperature_2m_max[0])}° &nbsp; L: ${Math.round(data.daily.temperature_2m_min[0])}°</div>
+                `;
+                
+                document.getElementById('w-desc-box').innerHTML = `
+                    <div class='text-sm font-medium text-accent leading-snug mb-3'>${synopsis}</div>
+                    <div class='flex flex-col gap-2 text-xs text-zinc-400 font-semibold tracking-wide'>
+                        <div class='flex items-center gap-2'>
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83M12 16a4 4 0 100-8 4 4 0 000 8z"/></svg>
+                            ${riseTime}
+                        </div>
+                        <div class='flex items-center gap-2'>
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83M12 16a4 4 0 100-8 4 4 0 000 8z"/></svg>
+                            ${setTime}
+                        </div>
                     </div>
                 `;
                 renderTideGraph(currentLoc === 'dg');
             } catch(e) { 
-                document.getElementById('w-content').innerHTML = "<div class='text-red-500 py-4'>Weather data unavailable.</div>"; 
+                document.getElementById('w-temp-box').innerHTML = "<div class='text-red-500 py-4 text-sm'>Error loading weather.</div>"; 
             }
         }
 
@@ -392,17 +421,23 @@
                     new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), timeout))
                 ]);
 
-                // Promise.allSettled ensures one broken feed doesn't crash the whole tab
                 const results = await Promise.allSettled(NEWS_FEEDS.map(f => fetchWithTimeout(f)));
+                
+                // Aggregate everything BEFORE sorting
                 const all = results
                     .filter(r => r.status === 'fulfilled' && r.value.items)
-                    .flatMap(r => r.value.items)
-                    .sort((a,b) => new Date(b.pubDate) - new Date(a.pubDate));
+                    .flatMap(r => {
+                        return r.value.items.map(item => ({
+                            ...item,
+                            feedTitle: r.value.feed?.title || item.source || 'News'
+                        }));
+                    })
+                    .sort((a,b) => new Date(b.pubDate) - new Date(a.pubDate)); // Global recency sort
                 
                 if(all.length === 0) throw new Error();
                 
-                newsEl.innerHTML = all.slice(0, 30).map(i => {
-                    const src = i.source || i.feed?.title || 'News';
+                newsEl.innerHTML = all.slice(0, 35).map(i => {
+                    const src = i.feedTitle;
                     const brandClasses = getBrandIdentity(src);
                     const letter = src.charAt(0).toUpperCase();
                     const timeStr = timeAgo(i.pubDate);
@@ -410,17 +445,17 @@
                     return `
                         <div class='item-card'>
                             <div class="news-brand-badge ${brandClasses}">${letter}</div>
-                            <div class="flex-1">
+                            <div class="flex-1 overflow-hidden">
                                 <p class='font-bold text-[15px] text-white leading-snug'>${i.title}</p>
-                                <p class='text-[12px] text-zinc-400 mt-2 font-semibold uppercase tracking-wider'>
-                                    ${src} <span class="mx-1 text-zinc-600">•</span> <span class="text-zinc-500 lowercase">${timeStr}</span>
+                                <p class='text-[11px] text-zinc-400 mt-2 font-bold uppercase tracking-wider'>
+                                    ${src} <span class="mx-1 text-zinc-600">•</span> <span class="text-zinc-500">${timeStr}</span>
                                 </p>
                             </div>
                         </div>
                     `;
                 }).join('');
             } catch(e) { 
-                newsEl.innerHTML = "<div class='text-center py-10 text-zinc-500'>News feed unavailable or timed out.</div>"; 
+                newsEl.innerHTML = "<div class='text-center py-10 text-zinc-500'>News feed unavailable.</div>"; 
             }
         }
 
@@ -429,17 +464,24 @@
             
             try {
                 const fetchChan = async (ch) => {
-                    const res = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=https://www.youtube.com/feeds/videos.xml?channel_id=${ch.id}`);
-                    const data = await res.json();
-                    return (data.items || []).map(v => ({ ...v, author: ch.name }));
+                    try {
+                        // We use a try-catch inside the map so one broken feed doesn't crash Promise.all
+                        const res = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=https://www.youtube.com/feeds/videos.xml?channel_id=${ch.id}`);
+                        const data = await res.json();
+                        return (data.items || []).map(v => ({ ...v, author: ch.name }));
+                    } catch(e) {
+                        return [];
+                    }
                 };
 
-                // Using Promise.allSettled for maximum stability when fetching 10+ channels
+                // Fetch all channels simultaneously
                 const results = await Promise.allSettled(WATCH_CHANNELS.map(ch => fetchChan(ch)));
+                
+                // Aggregate all successfully fetched videos BEFORE sorting
                 const videos = results
                     .filter(r => r.status === 'fulfilled')
                     .flatMap(r => r.value)
-                    .sort((a,b) => new Date(b.pubDate) - new Date(a.pubDate));
+                    .sort((a,b) => new Date(b.pubDate) - new Date(a.pubDate)); // Global recency sort
                 
                 if(videos.length === 0) throw new Error();
                 
@@ -449,11 +491,11 @@
                     
                     return `
                     <div class='video-item'>
-                        <img src='${v.thumbnail}' class='video-thumb' onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%22100%22><rect width=%22100%22 height=%22100%22 fill=%22%2327272a%22/></svg>'">
+                        <img src='${v.thumbnail}' class='video-thumb' onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22120%22 height=%2275%22><rect width=%22120%22 height=%2275%22 fill=%22%2327272a%22/></svg>'">
                         <div class="flex-1 overflow-hidden">
                             <p class='font-bold text-[14px] text-white leading-tight mb-1'>${v.title}</p>
-                            <p class='text-[11px] text-zinc-400 font-bold uppercase tracking-wider mb-1'>
-                                ${v.author} <span class="mx-1 text-zinc-600">•</span> <span class="text-zinc-500 lowercase font-medium">${timeStr}</span>
+                            <p class='text-[10px] text-zinc-400 font-bold uppercase tracking-wider mb-1'>
+                                ${v.author} <span class="mx-1 text-zinc-600">•</span> <span class="text-zinc-500">${timeStr}</span>
                             </p>
                             <p class='text-[12px] text-zinc-500 line-clamp-2 leading-snug'>${summary}</p>
                         </div>
