@@ -111,18 +111,20 @@
             </div>
             
             <div id="tide-content" class="bg-zinc-900 p-5 rounded-3xl border border-zinc-800 shadow-xl shrink-0">
-                <div class="flex justify-between items-end mb-3">
+                <div class="flex justify-between items-start mb-3">
                     <p class='font-bold text-xl text-white'>Tides</p>
-                    <div id="tide-high-text" class="text-sm font-bold text-blue-400"></div>
+                    <div class="text-right">
+                        <div id="tide-high-text" class="text-sm font-bold text-blue-400"></div>
+                        <div id="tide-low-text" class="text-sm font-bold text-purple-400"></div>
+                    </div>
                 </div>
                 
-                <div id="tide-graph-wrapper" class="w-full h-[180px] relative bg-[#0f0f13] rounded-xl overflow-hidden border border-zinc-800/50 mb-3">
+                <div id="tide-graph-wrapper" class="w-full h-[180px] relative bg-[#0f0f13] rounded-xl overflow-hidden border border-zinc-800/50 mb-2">
                     <!-- SVG injected via JS -->
                 </div>
                 
-                <div class="flex justify-between items-start">
-                    <div id="tide-status" class="text-xs font-bold px-2 py-1 rounded bg-zinc-800 text-white tracking-wider"></div>
-                    <div id="tide-low-text" class="text-sm font-bold text-purple-400"></div>
+                <div class="flex justify-center items-start mt-2">
+                    <div id="tide-status" class="text-xs font-bold px-3 py-1.5 rounded bg-zinc-800 text-white tracking-wider"></div>
                 </div>
             </div>
         </section>
@@ -181,7 +183,7 @@
             'https://www.rte.ie/news/rss/news-headlines.xml',
             'https://www.thejournal.ie/feed/',
             'https://www.theguardian.com/international/rss',
-            'https://feeds.cnn.com/rss/edition.rss'
+            'http://rss.cnn.com/rss/edition.rss'
         ];
 
         const WATCH_CHANNELS = [
@@ -198,7 +200,7 @@
             { id: 'UCu2U6x65aC04p-2V675cQ3A', name: 'Off Menu' },
             { id: 'UCxXhS_nQJEDQhWeQ4S1GvLA', name: 'Warner Bros TV' },
             
-            // Tech / Niche
+            // Tech / Niche / Science
             { id: 'UCMb0O2CdPBNi-QqPk5T3gsQ', name: 'James Hoffmann' },
             { id: 'UCjwpGhw0h5_1oH0R0sioeAw', name: 'Lance Hedrick' },
             { id: 'UC0PEX_z3_18uQzQ511Y2Ogg', name: 'DC Rainmaker' },
@@ -364,52 +366,48 @@
                     </div>
                 `;
 
-                // Tide Graph Render (Enhanced with Current Time Marker & Axis)
+                // Render dynamic, contained Tide Graph
                 const width = 1000;
                 const height = 180;
-                let pathD = `M 0 ${height} `;
-                
-                const amp = 85; 
+                const amp = 60; // Increased amplitude for steeper waves
+                const yOffset = 80;
                 const offset = currentLoc === 'dg' ? 0 : Math.PI; 
                 
-                // Draw wave path
+                let pathD = `M 0 ${height} `;
                 for (let i = 0; i <= width; i += 10) {
                     const x = i;
-                    const y = (height / 2) + amp * Math.sin((i / width) * Math.PI * 4 + offset);
+                    const y = yOffset + amp * Math.sin((i / width) * Math.PI * 4 + offset);
                     pathD += `L ${x} ${y} `;
                 }
                 pathD += `L ${width} ${height} Z`;
 
-                // Current Time Logic
                 const now = new Date();
                 const currentHour = now.getHours() + (now.getMinutes() / 60);
                 const xPos = (currentHour / 24) * width;
-                const currentY = (height / 2) + amp * Math.sin((currentHour / 24) * Math.PI * 4 + offset);
+                const currentY = yOffset + amp * Math.sin((currentHour / 24) * Math.PI * 4 + offset);
                 
-                // Derivative check for rising vs falling
                 const slope = Math.cos((currentHour / 24) * Math.PI * 4 + offset);
-                const isRising = slope < 0; // inverted Y-axis logic in SVG
+                const isRising = slope < 0; // inverted Y-axis in SVG
                 const statusColor = isRising ? '#10b981' : '#ef4444'; 
                 const statusText = isRising ? '▲ Tide is Rising' : '▼ Tide is Falling';
 
                 document.getElementById('tide-graph-wrapper').innerHTML = `
                     <svg viewBox="0 0 1000 180" class="w-full h-full absolute inset-0" preserveAspectRatio="none">
-                        <!-- X-Axis Line -->
-                        <line x1="0" y1="165" x2="1000" y2="165" stroke="#27272a" stroke-width="2" />
-                        
-                        <!-- Hour Markers -->
-                        <text x="10" y="178" fill="#52525b" font-size="14" font-weight="bold">00:00</text>
-                        <text x="230" y="178" fill="#52525b" font-size="14" font-weight="bold">06:00</text>
-                        <text x="480" y="178" fill="#52525b" font-size="14" font-weight="bold">12:00</text>
-                        <text x="730" y="178" fill="#52525b" font-size="14" font-weight="bold">18:00</text>
-                        <text x="940" y="178" fill="#52525b" font-size="14" font-weight="bold">24:00</text>
-
                         <!-- The Wave -->
                         <path class="tide-wave" d="${pathD}" />
                         
-                        <!-- Current Time Indicator -->
-                        <line x1="${xPos}" y1="0" x2="${xPos}" y2="165" stroke="${statusColor}" stroke-width="4" stroke-dasharray="8,8" />
-                        <circle cx="${xPos}" cy="${currentY}" r="8" fill="${statusColor}" stroke="#18181b" stroke-width="3" />
+                        <!-- X-Axis Line -->
+                        <line x1="0" y1="150" x2="1000" y2="150" stroke="#27272a" stroke-width="2" />
+                        
+                        <!-- Hour Markers (Dropped beneath axis line) -->
+                        <text x="10" y="170" fill="#71717a" font-size="16" font-weight="bold">00:00</text>
+                        <text x="230" y="170" fill="#71717a" font-size="16" font-weight="bold">06:00</text>
+                        <text x="480" y="170" fill="#71717a" font-size="16" font-weight="bold">12:00</text>
+                        <text x="730" y="170" fill="#71717a" font-size="16" font-weight="bold">18:00</text>
+                        <text x="940" y="170" fill="#71717a" font-size="16" font-weight="bold">24:00</text>
+
+                        <!-- Current Time Dot Only -->
+                        <circle cx="${xPos}" cy="${currentY}" r="10" fill="${statusColor}" stroke="#18181b" stroke-width="4" />
                     </svg>
                 `;
                 
@@ -418,7 +416,7 @@
                 
                 const statusEl = document.getElementById('tide-status');
                 statusEl.innerText = statusText;
-                statusEl.className = `text-xs font-bold px-2 py-1 rounded tracking-wider ${isRising ? 'bg-emerald-950/50 text-emerald-400 border border-emerald-900' : 'bg-red-950/50 text-red-400 border border-red-900'}`;
+                statusEl.className = `text-xs font-bold px-3 py-1.5 rounded tracking-wider ${isRising ? 'bg-emerald-950/50 text-emerald-400 border border-emerald-900' : 'bg-red-950/50 text-red-400 border border-red-900'}`;
 
             } catch(e) { 
                 document.getElementById('w-temp-box').innerHTML = "<div class='text-red-500 py-4 text-sm'>Error</div>"; 
@@ -434,6 +432,7 @@
                     new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), timeout))
                 ]);
 
+                // Resolving all feeds simultaneously
                 const results = await Promise.allSettled(NEWS_FEEDS.map(f => fetchWithTimeout(f)));
                 
                 const all = results
@@ -450,7 +449,7 @@
                     let brandClass = 'brand-default';
                     let brandLetter = srcName.charAt(0).toUpperCase();
                     
-                    if (link.includes('cnn')) { brandClass = 'brand-cnn'; brandLetter = 'C'; }
+                    if (link.includes('cnn.com') || link.includes('cnn')) { brandClass = 'brand-cnn'; brandLetter = 'C'; }
                     else if (link.includes('bbc')) { brandClass = 'brand-bbc'; brandLetter = 'B'; }
                     else if (link.includes('rte')) { brandClass = 'brand-rte'; brandLetter = 'R'; }
                     else if (link.includes('thejournal')) { brandClass = 'brand-journal'; brandLetter = 'J'; }
@@ -501,7 +500,7 @@
                 
                 if(videos.length === 0) throw new Error();
                 
-                watchEl.innerHTML = videos.slice(0, 50).map(v => {
+                watchEl.innerHTML = videos.slice(0, 40).map(v => {
                     const timeStr = timeAgo(v.pubDate);
                     const summary = extractSummary(v.description);
                     
