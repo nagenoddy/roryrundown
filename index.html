@@ -5,8 +5,34 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Rise Rundown Dashboard</title>
     
+    <!-- Fallback standard favicon for desktop browsers -->
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0%25' stop-color='%23f59e0b'/%3E%3Cstop offset='100%25' stop-color='%238b5cf6'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='100' height='100' rx='22' fill='%2318181b'/%3E%3Ccircle cx='50' cy='50' r='30' fill='url(%23g)'/%3E%3C/svg%3E">
-    <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0%25' stop-color='%23f59e0b'/%3E%3Cstop offset='100%25' stop-color='%238b5cf6'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='100' height='100' rx='22' fill='%2318181b'/%3E%3Ccircle cx='50' cy='50' r='30' fill='url(%23g)'/%3E%3C/svg%3E">
+    
+    <script>
+        // Apple requires a PNG for homescreen icons. This script draws the Rise logo 
+        // dynamically to an invisible canvas and registers it instantly as a PNG.
+        (function(){
+            const cvs = document.createElement('canvas');
+            cvs.width = 180; cvs.height = 180;
+            const ctx = cvs.getContext('2d');
+            
+            // Background dark rounded rect
+            ctx.fillStyle = '#18181b';
+            ctx.beginPath(); ctx.roundRect(0, 0, 180, 180, 40); ctx.fill();
+            
+            // Sunset gradient circle
+            const grad = ctx.createLinearGradient(0, 0, 180, 180);
+            grad.addColorStop(0, '#f59e0b'); grad.addColorStop(1, '#8b5cf6');
+            ctx.fillStyle = grad;
+            ctx.beginPath(); ctx.arc(90, 90, 54, 0, Math.PI * 2); ctx.fill();
+            
+            // Export and attach
+            const link = document.createElement('link');
+            link.rel = 'apple-touch-icon';
+            link.href = cvs.toDataURL('image/png');
+            document.head.appendChild(link);
+        })();
+    </script>
     
     <script src="https://cdn.tailwindcss.com"></script>
     
@@ -70,21 +96,13 @@
             font-weight: 800; font-size: 1.2rem; box-shadow: inset 0 0 0 1px rgba(255,255,255,0.1);
         }
         
-        .video-thumb { 
-            width: 120px; height: 75px; background: #27272a; 
-            border-radius: 10px; flex-shrink: 0; object-fit: cover; 
-            box-shadow: inset 0 0 0 1px rgba(255,255,255,0.1);
-        }
-
         .line-clamp-2 {
             display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
         }
         
         #status-indicator { transition: background 0.3s ease, box-shadow 0.3s ease; }
         
-        .tide-graph-container {
-            width: 100%; height: 140px; margin-top: 16px; position: relative;
-        }
+        .tide-graph-container { width: 100%; height: 140px; margin-top: 16px; position: relative; }
         .tide-wave { fill: rgba(139, 92, 246, 0.15); stroke: var(--accent); stroke-width: 4; }
         .tide-point { fill: var(--text); }
         .pb-safe { padding-bottom: env(safe-area-inset-bottom, 20px); }
@@ -211,6 +229,15 @@
             'https://feeds.cnn.com/rss/edition.rss'
         ];
 
+        // Specific Brand Identity Mapping
+        const BRAND_MAP = [
+            { id: 'rte.ie', name: 'RTÉ News', letter: 'R', style: 'bg-emerald-600 text-white' },
+            { id: 'thejournal.ie', name: 'The Journal', letter: 'J', style: 'bg-blue-600 text-white' },
+            { id: 'bbci.co.uk', name: 'BBC News', letter: 'B', style: 'bg-yellow-400 text-black' },
+            { id: 'theguardian.com', name: 'The Guardian', letter: 'G', style: 'bg-blue-900 text-white' },
+            { id: 'cnn.com', name: 'CNN', letter: 'C', style: 'bg-red-600 text-white' }
+        ];
+
         // Expanded Channel List combining Tech, Comedy, and Classic Shows
         const WATCH_CHANNELS = [
             { id: 'UC9K540f2b_1N3y0m1l5lO2w', name: 'SNL' },
@@ -244,16 +271,6 @@
             interval = seconds / 60;
             if (interval > 1) return Math.floor(interval) + (Math.floor(interval) === 1 ? " min ago" : " mins ago");
             return "Just now";
-        }
-
-        function getBrandIdentity(sourceName) {
-            const src = sourceName.toLowerCase();
-            if (src.includes('cnn')) return 'bg-red-600 text-white';
-            if (src.includes('bbc')) return 'bg-yellow-400 text-black';
-            if (src.includes('journal')) return 'bg-blue-600 text-white';
-            if (src.includes('rté') || src.includes('rte')) return 'bg-emerald-600 text-white';
-            if (src.includes('guardian')) return 'bg-blue-900 text-white';
-            return 'bg-zinc-700 text-white'; // Default Fallback
         }
 
         function extractSummary(htmlString) {
@@ -352,13 +369,13 @@
             const height = 140;
             let pathD = `M 0 ${height} `;
             
-            // Dramatic amplitude to make the waves look tall and impactful
+            // Dramatic amplitude multiplier and 2 full cycles (Math.PI * 4) to ensure steep waves
             const amp = isDG ? 55 : 65; 
             const offset = isDG ? 0 : Math.PI; 
 
             for (let i = 0; i <= width; i += 10) {
                 const x = i;
-                const y = (height / 2) + amp * Math.sin((i / width) * Math.PI * 2 + offset);
+                const y = (height / 2) + amp * Math.sin((i / width) * Math.PI * 4 + offset);
                 pathD += `L ${x} ${y} `;
             }
             pathD += `L ${width} ${height} Z`;
@@ -369,8 +386,8 @@
             document.getElementById('tide-graph-wrapper').innerHTML = `
                 <svg viewBox="0 0 1000 140" class="w-full h-full rounded-xl overflow-hidden bg-[#0f0f13] border border-zinc-800/50">
                     <path class="tide-wave" d="${pathD}" />
-                    <!-- Visual marker for current approximate time (mocked center) -->
-                    <circle cx="500" cy="${(height / 2) + amp * Math.sin(Math.PI + offset)}" r="8" class="tide-point" stroke="rgba(139, 92, 246, 0.5)" stroke-width="4"/>
+                    <!-- Visual marker for approximate time -->
+                    <circle cx="500" cy="${(height / 2) + amp * Math.sin(Math.PI * 2 + offset)}" r="8" class="tide-point" stroke="rgba(139, 92, 246, 0.5)" stroke-width="4"/>
                 </svg>
             `;
             document.getElementById('tide-text').innerHTML = `<span class="mr-3">▼ ${lowText}</span><span>▲ ${highText}</span>`;
@@ -380,7 +397,6 @@
             const lat = currentLoc === 'dg' ? 53.28 : 52.85;
             const lon = currentLoc === 'dg' ? -6.15 : -9.53;
             try {
-                // Fetch daily extremes, current temp, weather code, and sunrise/sunset
                 const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=temperature_2m_max,temperature_2m_min,weathercode,sunrise,sunset&current=temperature_2m,weathercode&timezone=auto`);
                 const data = await res.json();
                 
@@ -426,29 +442,29 @@
                 // Aggregate everything BEFORE sorting
                 const all = results
                     .filter(r => r.status === 'fulfilled' && r.value.items)
-                    .flatMap(r => {
-                        return r.value.items.map(item => ({
-                            ...item,
-                            feedTitle: r.value.feed?.title || item.source || 'News'
-                        }));
-                    })
+                    .flatMap(r => r.value.items)
                     .sort((a,b) => new Date(b.pubDate) - new Date(a.pubDate)); // Global recency sort
                 
                 if(all.length === 0) throw new Error();
                 
                 newsEl.innerHTML = all.slice(0, 35).map(i => {
-                    const src = i.feedTitle;
-                    const brandClasses = getBrandIdentity(src);
-                    const letter = src.charAt(0).toUpperCase();
+                    const link = i.link || "";
+                    
+                    // Smart Brand Matching based on URL
+                    const brandMatch = BRAND_MAP.find(m => link.includes(m.id));
+                    const srcName = brandMatch ? brandMatch.name : (i.source || 'News');
+                    const srcLetter = brandMatch ? brandMatch.letter : srcName.charAt(0).toUpperCase();
+                    const brandClasses = brandMatch ? brandMatch.style : 'bg-zinc-700 text-white';
+                    
                     const timeStr = timeAgo(i.pubDate);
                     
                     return `
                         <div class='item-card'>
-                            <div class="news-brand-badge ${brandClasses}">${letter}</div>
-                            <div class="flex-1 overflow-hidden">
+                            <div class="news-brand-badge ${brandClasses}">${srcLetter}</div>
+                            <div class="flex-1 min-w-0">
                                 <p class='font-bold text-[15px] text-white leading-snug'>${i.title}</p>
                                 <p class='text-[11px] text-zinc-400 mt-2 font-bold uppercase tracking-wider'>
-                                    ${src} <span class="mx-1 text-zinc-600">•</span> <span class="text-zinc-500">${timeStr}</span>
+                                    ${srcName} <span class="mx-1 text-zinc-600">•</span> <span class="text-zinc-500">${timeStr}</span>
                                 </p>
                             </div>
                         </div>
@@ -465,7 +481,6 @@
             try {
                 const fetchChan = async (ch) => {
                     try {
-                        // We use a try-catch inside the map so one broken feed doesn't crash Promise.all
                         const res = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=https://www.youtube.com/feeds/videos.xml?channel_id=${ch.id}`);
                         const data = await res.json();
                         return (data.items || []).map(v => ({ ...v, author: ch.name }));
@@ -474,14 +489,13 @@
                     }
                 };
 
-                // Fetch all channels simultaneously
+                // Use allSettled so one broken channel doesn't stop the feed
                 const results = await Promise.allSettled(WATCH_CHANNELS.map(ch => fetchChan(ch)));
                 
-                // Aggregate all successfully fetched videos BEFORE sorting
                 const videos = results
                     .filter(r => r.status === 'fulfilled')
                     .flatMap(r => r.value)
-                    .sort((a,b) => new Date(b.pubDate) - new Date(a.pubDate)); // Global recency sort
+                    .sort((a,b) => new Date(b.pubDate) - new Date(a.pubDate)); 
                 
                 if(videos.length === 0) throw new Error();
                 
@@ -490,14 +504,14 @@
                     const summary = extractSummary(v.description);
                     
                     return `
-                    <div class='video-item'>
-                        <img src='${v.thumbnail}' class='video-thumb' onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22120%22 height=%2275%22><rect width=%22120%22 height=%2275%22 fill=%22%2327272a%22/></svg>'">
-                        <div class="flex-1 overflow-hidden">
-                            <p class='font-bold text-[14px] text-white leading-tight mb-1'>${v.title}</p>
-                            <p class='text-[10px] text-zinc-400 font-bold uppercase tracking-wider mb-1'>
+                    <div class='flex gap-4 items-start mb-5 bg-zinc-900/50 p-3 rounded-2xl border border-zinc-800/50'>
+                        <img src='${v.thumbnail}' class='w-[120px] h-[75px] rounded-xl object-cover flex-shrink-0 shadow-md border border-zinc-800' onerror="this.style.display='none'">
+                        <div class="flex-1 min-w-0">
+                            <h3 class='font-bold text-[14px] text-white leading-tight mb-1 line-clamp-2'>${v.title}</h3>
+                            <p class='text-[10px] text-zinc-400 font-bold uppercase tracking-wider mb-1.5'>
                                 ${v.author} <span class="mx-1 text-zinc-600">•</span> <span class="text-zinc-500">${timeStr}</span>
                             </p>
-                            <p class='text-[12px] text-zinc-500 line-clamp-2 leading-snug'>${summary}</p>
+                            <p class='text-[11px] text-zinc-500 line-clamp-2 leading-snug'>${summary}</p>
                         </div>
                     </div>`;
                 }).join('');
