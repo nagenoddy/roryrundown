@@ -26,15 +26,10 @@
 
     <style>
         :root { 
-            --bg: #09090b; 
-            --card: #18181b; 
-            --text: #f3f4f6; 
-            --accent: #8b5cf6; 
-            --border: #27272a; 
+            --bg: #09090b; --card: #18181b; --text: #f3f4f6; --accent: #8b5cf6; --border: #27272a; 
         }
         body { 
-            background: var(--bg); 
-            color: var(--text); 
+            background: var(--bg); color: var(--text); 
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
             -webkit-tap-highlight-color: transparent; 
         }
@@ -42,12 +37,14 @@
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
+        /* Pinned Frame Architecture */
         .app-container { height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
         
-        .tab-content { display: none; padding-bottom: 24px; }
-        .tab-content.active { display: block; animation: fadeIn 0.3s ease; }
+        .tab-content { display: none; height: 100%; flex-direction: column; }
+        .tab-content.active { display: flex; animation: fadeIn 0.3s ease; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
         
+        /* News Branding Badges */
         .brand-cnn { background-color: #dc2626; color: white; }
         .brand-bbc { background-color: #facc15; color: black; }
         .brand-rte { background-color: #0ea5e9; color: white; } 
@@ -55,22 +52,20 @@
         .brand-guardian { background-color: #1e40af; color: white; }
         .brand-default { background-color: #3f3f46; color: white; }
         
-        .nav-btn { color: #52525b; transition: all 0.2s; display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 11px; font-weight: 600; padding: 12px 8px; }
+        .nav-btn { color: #52525b; transition: all 0.2s; display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: 11px; font-weight: 600; padding: 10px 8px; }
         .nav-btn svg { stroke: currentColor; fill: none; stroke-width: 2; width: 24px; height: 24px; }
         .nav-btn.active { color: var(--accent); }
         
-        .tide-wave { fill: none; stroke: var(--accent); stroke-width: 3; stroke-linecap: round; }
-        .pb-safe { padding-bottom: env(safe-area-inset-bottom, 20px); }
-        
         .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .pb-safe { padding-bottom: env(safe-area-inset-bottom, 16px); }
     </style>
 </head>
 
 <body class="app-container max-w-md mx-auto bg-zinc-950 shadow-2xl shadow-black relative">
 
-    <header class="flex-none bg-zinc-950/95 backdrop-blur-md border-b border-zinc-800 p-4 px-5 flex items-center justify-between z-50">
+    <header class="flex-none bg-zinc-950/95 backdrop-blur-md border-b border-zinc-800 p-4 flex items-center justify-between z-50">
         <div class="flex items-center gap-3">
-            <svg width="40" height="40" viewBox="0 0 100 100">
+            <svg width="36" height="36" viewBox="0 0 100 100">
                 <defs>
                     <linearGradient id='gradHead' x1='0' y1='0' x2='1' y2='1'>
                         <stop offset='0%' stop-color='#f59e0b'/>
@@ -82,81 +77,78 @@
             </svg>
             <div>
                 <h1 class="text-xl font-bold text-white tracking-tight leading-none">Rise</h1>
-                <p id="date-display" class="text-[11px] text-zinc-400 font-bold uppercase tracking-wider mt-1"></p>
+                <p id="date-display" class="text-[10px] text-zinc-400 font-bold uppercase tracking-wider mt-1"></p>
             </div>
         </div>
         <div id="status-indicator" class="w-3 h-3 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)] transition-colors duration-300"></div>
     </header>
 
-    <main class="flex-1 overflow-y-auto overflow-x-hidden hide-scrollbar px-4 pt-4 relative">
+    <main class="flex-1 overflow-y-auto overflow-x-hidden hide-scrollbar p-3 relative">
         
-        <section id="tab-weather" class="tab-content active h-full space-y-6">
-            <div class="bg-zinc-900 rounded-2xl p-1.5 flex border border-zinc-800 shrink-0">
-                <button onclick="setLoc('dg')" id="btn-dg" class="flex-1 py-3 rounded-xl font-bold text-sm transition-colors">Deansgrange</button>
-                <button onclick="setLoc('sp')" id="btn-sp" class="flex-1 py-3 rounded-xl font-bold text-sm transition-colors">Spanish Point</button>
+        <!-- Weather Tab (Designed to fit on one screen) -->
+        <section id="tab-weather" class="tab-content active space-y-3">
+            
+            <div class="bg-zinc-900 rounded-2xl p-1 flex border border-zinc-800 shrink-0">
+                <button onclick="setLoc('dg')" id="btn-dg" class="flex-1 py-2.5 rounded-xl font-bold text-[13px] transition-colors">Deansgrange</button>
+                <button onclick="setLoc('sp')" id="btn-sp" class="flex-1 py-2.5 rounded-xl font-bold text-[13px] transition-colors">Spanish Point</button>
             </div>
             
-            <div class="bg-zinc-900 rounded-3xl p-5 border border-zinc-800 shadow-xl shrink-0">
-                <div class="grid grid-cols-2 gap-4">
-                    <div id="w-stats-box" class="border-r border-zinc-800 pr-4 flex flex-col justify-center">
-                        <div class="animate-pulse w-16 h-16 bg-zinc-800 rounded-full mb-2"></div>
+            <div class="bg-zinc-900 rounded-3xl p-4 border border-zinc-800 shadow-xl shrink-0 flex flex-col justify-between">
+                <h2 class="font-bold text-[15px] text-white mb-3">Forecast</h2>
+                <div class="flex gap-3 h-full">
+                    <!-- LHS: Metrics -->
+                    <div id="w-stats-box" class="w-1/2 border-r border-zinc-800 pr-3 flex flex-col justify-center">
+                        <div class="animate-pulse w-full h-20 bg-zinc-800 rounded-xl"></div>
                     </div>
-                    <div id="w-desc-box" class="pl-2 flex flex-col justify-center">
+                    <!-- RHS: Prose Description -->
+                    <div id="w-desc-box" class="w-1/2 pl-1 flex flex-col justify-center">
                         <div class="text-zinc-500 text-sm">Fetching forecast...</div>
                     </div>
                 </div>
             </div>
             
-            <div id="tide-content" class="bg-zinc-900 p-5 rounded-3xl border border-zinc-800 shadow-xl shrink-0">
-                <div class="flex justify-between items-start mb-4">
-                    <p class='font-bold text-xl text-white'>Tides</p>
+            <div id="tide-content" class="bg-zinc-900 p-4 rounded-3xl border border-zinc-800 shadow-xl flex-1 flex flex-col min-h-[220px]">
+                <div class="flex justify-between items-start mb-2">
+                    <h2 class='font-bold text-[15px] text-white'>Tides</h2>
                     <div class="text-right">
-                        <div id="tide-high-text" class="text-sm font-bold text-blue-400"></div>
-                        <div id="tide-low-text" class="text-sm font-bold text-indigo-400 mt-0.5"></div>
+                        <div id="tide-high-text" class="text-[12px] font-bold text-blue-400">▲ High: --:--</div>
+                        <div id="tide-low-text" class="text-[12px] font-bold text-indigo-400 mt-0.5">▼ Low: --:--</div>
                     </div>
                 </div>
                 
-                <div id="tide-graph-wrapper" class="w-full h-[180px] relative rounded-xl overflow-hidden mb-1">
-                    <!-- SVG injected via JS -->
-                </div>
+                <div id="tide-status" class="text-[11px] font-bold mb-2 uppercase tracking-wide"></div>
                 
-                <div class="flex justify-between text-[10px] font-bold text-zinc-500 px-2 uppercase tracking-wider">
-                    <span>00:00</span>
-                    <span>06:00</span>
-                    <span>12:00</span>
-                    <span>18:00</span>
-                    <span>00:00</span>
+                <div id="tide-graph-wrapper" class="w-full flex-1 relative rounded-xl overflow-hidden border border-zinc-800/50 bg-zinc-950/30">
+                    <!-- SVG injected via JS -->
                 </div>
             </div>
         </section>
 
-        <section id="tab-schedule" class="tab-content">
-            <div class="flex items-center justify-between gap-4 py-4 mb-2">
-                <button onclick="changeDay(-1)" class="w-14 h-14 bg-zinc-900 rounded-2xl flex items-center justify-center font-bold text-xl border border-zinc-800 hover:bg-zinc-800 active:scale-95 transition-all text-zinc-400">◀</button>
-                <button onclick="resetDay()" id="day-label" class="flex-1 h-14 bg-zinc-900 rounded-2xl flex items-center justify-center font-extrabold text-lg uppercase tracking-wide border border-zinc-800 hover:bg-zinc-800 active:scale-95 transition-all text-white">Today</button>
-                <button onclick="changeDay(1)" class="w-14 h-14 bg-zinc-900 rounded-2xl flex items-center justify-center font-bold text-xl border border-zinc-800 hover:bg-zinc-800 active:scale-95 transition-all text-zinc-400">▶</button>
+        <section id="tab-schedule" class="tab-content block">
+            <div class="flex items-center justify-between gap-3 mb-3">
+                <button onclick="changeDay(-1)" class="w-12 h-12 bg-zinc-900 rounded-2xl flex items-center justify-center font-bold text-lg border border-zinc-800 hover:bg-zinc-800 active:scale-95 transition-all text-zinc-400">◀</button>
+                <button onclick="resetDay()" id="day-label" class="flex-1 h-12 bg-zinc-900 rounded-2xl flex items-center justify-center font-extrabold text-[15px] uppercase tracking-wide border border-zinc-800 hover:bg-zinc-800 active:scale-95 transition-all text-white">Today</button>
+                <button onclick="changeDay(1)" class="w-12 h-12 bg-zinc-900 rounded-2xl flex items-center justify-center font-bold text-lg border border-zinc-800 hover:bg-zinc-800 active:scale-95 transition-all text-zinc-400">▶</button>
             </div>
-            <div id="sched-content" class="space-y-3 pb-8">
+            <div id="sched-content" class="space-y-3 pb-4 block">
                 <div class='text-center text-zinc-500 py-10 font-medium animate-pulse'>Syncing Calendar...</div>
             </div>
         </section>
 
-        <section id="tab-news" class="tab-content">
-            <h2 class="text-xl font-bold text-white tracking-tight mb-4 px-1">Top Stories</h2>
-            <div id="news-content" class="space-y-3 pb-8">
+        <section id="tab-news" class="tab-content block">
+            <div id="news-content" class="space-y-3 pb-4 block">
                 <div class='text-center text-zinc-500 py-10 font-medium animate-pulse'>Aggregating global sources...</div>
             </div>
         </section>
 
-        <section id="tab-watch" class="tab-content">
-            <h2 class="text-xl font-bold text-white tracking-tight mb-4 px-1">Latest Videos</h2>
-            <div id="watch-content" class="space-y-4 pb-8">
+        <section id="tab-watch" class="tab-content block">
+            <div id="watch-content" class="space-y-3 pb-4 block">
                 <div class='text-center text-zinc-500 py-10 font-medium animate-pulse'>Syncing channels...</div>
             </div>
         </section>
     </main>
 
-    <nav class="flex-none bg-zinc-950/98 backdrop-blur-xl border-t border-zinc-800 flex justify-between px-2 pt-2 pb-safe z-50">
+    <nav class="flex-none bg-zinc-950 border-t border-zinc-800 flex justify-between px-2 pt-1 pb-safe z-50">
         <button onclick="switchTab('weather', this)" class="nav-btn active">
             <svg viewBox="0 0 24 24"><path d="M17.5 19C19.9853 19 22 16.9853 22 14.5C22 12.1332 20.1818 10.2016 17.8596 10.021C17.4103 6.64333 14.5218 4 11 4C7.13401 4 4 7.13401 4 11C4 11.2374 4.01183 11.472 4.03478 11.7032C2.29828 12.3596 1 14.0253 1 16C1 18.2091 2.79086 20 5 20H17.5Z"/></svg>
             Weather
@@ -185,50 +177,40 @@
             'https://www.rte.ie/news/rss/news-headlines.xml',
             'https://www.thejournal.ie/feed/',
             'https://www.theguardian.com/international/rss',
-            'http://rss.cnn.com/rss/edition.rss'
+            'http://rss.cnn.com/rss/cnn_topstories.rss' // Explicit CNN feed
         ];
 
         const WATCH_CHANNELS = [
-            // Comedy / Late Night
+            // Specifically requested additions
+            { id: 'UC0PEX_z3_18uQzQ511Y2Ogg', name: 'DC Rainmaker' },
+            { id: 'UCCxKCCjuHEMA_XFovQJkrtQ', name: 'Kermode and Mayo' },
+            { id: 'UCDiC215i-0C4M97W483k0bA', name: 'CNN' },
+            { id: 'UC16niRr50-MSBwiO3YDb3RA', name: 'BBC News' },
+            { id: 'UC_I_J8D7B2-BvIOMu1o5t3Q', name: 'RTÉ News' },
+            
+            // Core curated list (no limits dropped)
             { id: 'UC9K540f2b_1N3y0m1l5lO2w', name: 'SNL' },
             { id: 'UCqFzWxSCi39LnW1ZAveBgOA', name: 'Team Coco' },
-            { id: 'UC0hQpeHKPEAAMY4pYgYk-fA', name: 'Letterman' },
             { id: 'UCi7GJNg51C3jgmYTUwqoRVw', name: 'SmartLess' },
             { id: 'UC3XTzVzaHQEd30rQbuvCtWQ', name: 'Last Week Tonight' },
-            { id: 'UCbZ2GqPqj-7dD7S0Vn8e2kQ', name: 'Daily Show' },
             { id: 'UC8-Th83bH_thdKZDJCrn88g', name: 'Seth Meyers' },
             { id: 'UCMtFAi84ehTSYSE9XoHefig', name: 'Stephen Colbert' },
-            { id: 'UCa6vGFO9ty8v5KZJXQxdhaw', name: 'Jimmy Kimmel' },
-            { id: 'UCu2U6x65aC04p-2V675cQ3A', name: 'Off Menu' },
-            
-            // Tech / Niche
             { id: 'UCMb0O2CdPBNi-QqPk5T3gsQ', name: 'James Hoffmann' },
             { id: 'UCjwpGhw0h5_1oH0R0sioeAw', name: 'Lance Hedrick' },
-            { id: 'UC0PEX_z3_18uQzQ511Y2Ogg', name: 'DC Rainmaker' },
             { id: 'UCaXgeReu2G1X7bY1483G2-A', name: 'MKBHD' },
             { id: 'UCa6RRisU52o5-n6S1X9_J3g', name: 'Linus Tech Tips' },
-            { id: 'UC70xQo3a74aH4jE6qV2s0tA', name: 'TED' },
-            
-            // News / Finance / Sports
-            { id: 'UCupvZgA3wgS_Pazpt52iNdg', name: 'Sky News' },
-            { id: 'UCDiC215i-0C4M97W483k0bA', name: 'CNN' },
-            { id: 'UC4x3eJtU22lX8_9M-2C626g', name: 'BBC News' },
-            { id: 'UC_I_J8D7B2-BvIOMu1o5t3Q', name: 'RTÉ News' },
-            { id: 'UClzRmAESZrgQ-I-kCM6R4-Q', name: 'Vox' },
-            { id: 'UCn8zNIfYAQNdrFRrr8oibKw', name: 'Vice' },
             { id: 'UCcgqMZvAkyA-EaaZvu2n0ng', name: 'Bloomberg' },
             { id: 'UCK7tptYoggEXpdOwRGUbmVA', name: 'WSJ' },
-            { id: 'UCvQECJukTDE2i6aCoMnS-Vg', name: 'Financial Times' },
-            { id: 'UC7jF7F_rA2J4xK6Eij92Htw', name: 'BBC Sport' }
+            { id: 'UC0hQpeHKPEAAMY4pYgYk-fA', name: 'Letterman' }
         ];
 
         function timeAgo(dateString) {
             const date = new Date(dateString);
             const seconds = Math.floor((new Date() - date) / 1000);
             let interval = Math.floor(seconds / 31536000);
-            if (interval >= 1) return interval === 1 ? "1 year ago" : `${interval} years ago`;
+            if (interval >= 1) return interval === 1 ? "1 yr ago" : `${interval} yrs ago`;
             interval = Math.floor(seconds / 2592000);
-            if (interval >= 1) return interval === 1 ? "1 month ago" : `${interval} months ago`;
+            if (interval >= 1) return interval === 1 ? "1 mo ago" : `${interval} mos ago`;
             interval = Math.floor(seconds / 86400);
             if (interval >= 1) return interval === 1 ? "1 day ago" : `${interval} days ago`;
             interval = Math.floor(seconds / 3600);
@@ -236,11 +218,6 @@
             interval = Math.floor(seconds / 60);
             if (interval >= 1) return interval === 1 ? "1 min ago" : `${interval} mins ago`;
             return "Just now";
-        }
-
-        function extractSummary(htmlString) {
-            const doc = new DOMParser().parseFromString(htmlString, 'text/html');
-            return (doc.body.textContent || "").replace(/\s+/g, ' ').trim().substring(0, 95) + '...';
         }
 
         function formatTime(isoString) {
@@ -257,8 +234,30 @@
         function switchTab(id, btn) {
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById('tab-' + id).classList.add('active');
+            
+            const targetTab = document.getElementById('tab-' + id);
+            targetTab.classList.add('active');
             btn.classList.add('active');
+            
+            // Force redraw of schedule/news/watch to fix flex display bug
+            if(id !== 'weather') {
+                targetTab.style.display = 'block';
+            }
+        }
+
+        function setLoc(loc) {
+            currentLoc = loc;
+            localStorage.setItem('riseLoc', loc);
+            
+            document.getElementById('btn-dg').className = loc === 'dg' ? 
+                'flex-1 py-2.5 rounded-xl font-bold text-[13px] bg-zinc-800 text-white shadow-sm transition-colors' : 
+                'flex-1 py-2.5 rounded-xl font-bold text-[13px] text-zinc-500 transition-colors';
+            
+            document.getElementById('btn-sp').className = loc === 'sp' ? 
+                'flex-1 py-2.5 rounded-xl font-bold text-[13px] bg-zinc-800 text-white shadow-sm transition-colors' : 
+                'flex-1 py-2.5 rounded-xl font-bold text-[13px] text-zinc-500 transition-colors';
+                
+            loadWeather();
         }
 
         async function fetchSched() {
@@ -266,11 +265,10 @@
             date.setDate(date.getDate() + dayOffset);
             const dStr = date.toISOString().split('T')[0];
             
-            let display;
-            if (dayOffset === 0) display = "Today";
-            else if (dayOffset === 1) display = "Tomorrow";
-            else if (dayOffset === -1) display = "Yesterday";
-            else display = date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric'});
+            let display = dayOffset === 0 ? "Today" : 
+                          dayOffset === 1 ? "Tomorrow" : 
+                          dayOffset === -1 ? "Yesterday" : 
+                          date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric'});
             
             document.getElementById('day-label').innerText = display;
             const content = document.getElementById('sched-content');
@@ -279,20 +277,17 @@
             document.getElementById('status-indicator').className = "w-3 h-3 rounded-full bg-amber-500 shadow-[0_0_10px_rgba(245,158,11,0.5)]";
 
             try {
-                const controller = new AbortController();
-                const id = setTimeout(() => controller.abort(), 8000);
-                const res = await fetch(`${CAL_URL}?date=${dStr}`, { signal: controller.signal });
+                const res = await fetch(`${CAL_URL}?date=${dStr}`);
                 const data = await res.json();
-                clearTimeout(id);
                 
                 if(data.status === "error") throw new Error(data.message);
                 
                 if(data.events && data.events.length > 0) {
                     content.innerHTML = data.events.map(e => `
-                        <div class='bg-zinc-900 p-5 rounded-2xl border border-zinc-800 shadow-sm flex items-start gap-4'>
+                        <div class='bg-zinc-900 p-4 rounded-2xl border border-zinc-800 shadow-sm flex items-start gap-4'>
                             <div class="flex-1">
-                                <p class='font-bold text-[17px] text-white leading-snug'>${e.title}</p>
-                                <p class='text-sm text-zinc-400 mt-2 font-medium flex items-center gap-2'>
+                                <p class='font-bold text-[16px] text-white leading-snug'>${e.title}</p>
+                                <p class='text-[13px] text-zinc-400 mt-1.5 font-medium flex items-center gap-2'>
                                     <span class="bg-zinc-800 text-accent px-2 py-0.5 rounded text-xs tracking-wide">${e.time}</span>
                                     <span>${e.calendarName}</span>
                                 </p>
@@ -305,67 +300,60 @@
                     document.getElementById('status-indicator').className = "w-3 h-3 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]";
                 }
             } catch(e) { 
-                content.innerHTML = "<div class='text-center py-10 text-red-500 font-medium bg-red-950/30 rounded-xl border border-red-900/50 p-4'>Calendar Sync Error. Check Scripts or Network.</div>"; 
+                content.innerHTML = "<div class='text-center py-10 text-red-500 font-medium bg-red-950/30 rounded-xl border border-red-900/50 p-4'>Calendar Sync Error. Check Bridge URL.</div>"; 
                 document.getElementById('status-indicator').className = "w-3 h-3 rounded-full bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.5)]";
             }
         }
 
         function changeDay(delta) { dayOffset += delta; fetchSched(); }
         function resetDay() { dayOffset = 0; fetchSched(); }
-        
-        function setLoc(loc) {
-            currentLoc = loc;
-            localStorage.setItem('riseLoc', loc);
-            document.getElementById('btn-dg').className = loc === 'dg' ? 'flex-1 py-3 rounded-xl font-bold text-sm bg-zinc-800 text-white shadow-sm transition-colors' : 'flex-1 py-3 rounded-xl font-bold text-sm text-zinc-500 transition-colors';
-            document.getElementById('btn-sp').className = loc === 'sp' ? 'flex-1 py-3 rounded-xl font-bold text-sm bg-zinc-800 text-white shadow-sm transition-colors' : 'flex-1 py-3 rounded-xl font-bold text-sm text-zinc-500 transition-colors';
-            loadWeather();
-        }
 
         function getForecastProse(code, temp) {
-            let base = "";
-            if (code <= 1) base = "Expect bright, clear skies with extensive sunny spells throughout the day.";
-            else if (code <= 3) base = "A mix of cloud cover and sunshine, remaining largely dry today.";
-            else if (code <= 48) base = "Starting with dense fog and low visibility, clearing slowly as the day progresses.";
-            else if (code <= 67) base = "Overcast conditions prevailing with intermittent periods of light rain or drizzle.";
-            else if (code <= 77) base = "Cold conditions bringing a likelihood of snow showers or sleet.";
-            else base = "Unsettled weather expected with heavy rain and potential storm conditions.";
+            let base = ""; let icon = "";
+            if (code <= 1) { base = "Bright and clear skies today, offering extensive sunny spells."; icon = "☀️"; }
+            else if (code <= 3) { base = "A gentle mix of cloud cover and sunshine. Remaining largely dry."; icon = "⛅"; }
+            else if (code <= 48) { base = "Starting with dense fog/mist, expected to clear slowly as the day progresses."; icon = "🌫️"; }
+            else if (code <= 67) { base = "Overcast conditions prevailing today with intermittent periods of light rain or drizzle."; icon = "🌧️"; }
+            else if (code <= 77) { base = "Cold conditions bringing a likelihood of snow showers or sleet."; icon = "❄️"; }
+            else { base = "Unsettled weather expected with heavy rain and potential stormy conditions."; icon = "⛈️"; }
             
             let tempContext = "";
-            if (temp < 10) tempContext = " Wrap up warm as temperatures will feel quite chilly.";
+            if (temp < 10) tempContext = " Wrap up warm as temperatures remain quite chilly.";
             else if (temp >= 20) tempContext = " A genuinely warm day, perfect for outdoor activities.";
             
-            return base + tempContext;
+            return `<b>${icon}</b> ${base}${tempContext}`;
         }
 
         async function loadWeather() {
             const lat = currentLoc === 'dg' ? 53.28 : 52.85;
             const lon = currentLoc === 'dg' ? -6.15 : -9.53;
+            
             try {
                 const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=temperature_2m_max,temperature_2m_min,weathercode,sunrise,sunset&current=temperature_2m,weathercode&timezone=auto`);
                 const data = await res.json();
                 
-                const riseTime = formatTime(data.daily.sunrise[0]);
-                const setTime = formatTime(data.daily.sunset[0]);
                 const currentTemp = Math.round(data.current.temperature_2m);
                 const prose = getForecastProse(data.daily.weathercode[0] || data.current.weathercode, currentTemp);
                 
                 document.getElementById('w-stats-box').innerHTML = `
-                    <div class='text-xs text-zinc-500 font-bold uppercase tracking-wider mb-1'>Current</div>
-                    <div class='text-[64px] leading-none font-black text-white tracking-tighter'>${currentTemp}°</div>
+                    <div class='text-[10px] text-zinc-500 font-bold uppercase tracking-wider mb-0.5'>Current</div>
+                    <div class='text-[48px] leading-none font-black text-white tracking-tighter'>${currentTemp}°</div>
                     
-                    <div class='mt-4 flex flex-col gap-2'>
-                        <div class='text-sm font-bold text-zinc-400 tracking-wide flex items-center gap-2'>
+                    <div class='mt-4 flex gap-4'>
+                        <!-- Left Sub-column: H/L -->
+                        <div class='flex flex-col gap-1 text-[13px] font-bold tracking-wide'>
                             <span class="text-red-400">H: ${Math.round(data.daily.temperature_2m_max[0])}°</span>
                             <span class="text-blue-400">L: ${Math.round(data.daily.temperature_2m_min[0])}°</span>
                         </div>
-                        <div class='flex flex-col gap-1 text-[11px] text-zinc-400 font-semibold tracking-wide'>
+                        <!-- Right Sub-column: Sun -->
+                        <div class='flex flex-col gap-1 text-[13px] text-zinc-400 font-semibold tracking-wide'>
                             <div class='flex items-center gap-1.5'>
                                 <svg class="w-3.5 h-3.5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
-                                ${riseTime}
+                                ${formatTime(data.daily.sunrise[0])}
                             </div>
                             <div class='flex items-center gap-1.5'>
                                 <svg class="w-3.5 h-3.5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
-                                ${setTime}
+                                ${formatTime(data.daily.sunset[0])}
                             </div>
                         </div>
                     </div>
@@ -377,49 +365,70 @@
 
                 const width = 1000;
                 const height = 180;
-                const amp = 80; 
-                const yOffset = 90;
+                const amp = 60; 
+                const yOffset = 80; // Shifted up slightly to make room for axis below
                 
-                // Dublin tide approx: High ~17:00 (17.0 hours)
-                const offset = currentLoc === 'dg' ? -(17/24) * Math.PI * 2 : -(18/24) * Math.PI * 2; 
+                // Dublin Tides (Semi-Diurnal) -> ~12.4 hour period. 
+                // High Tide today approx 17:06 (17.1 hours)
+                const period = 12.416;
+                const peakHour = currentLoc === 'dg' ? 17.1 : 17.8; 
                 
-                let pathD = `M 0 ${yOffset + amp * Math.cos(offset)} `;
+                let pathD = `M 0 ${yOffset + amp * Math.cos((0 - peakHour) * 2 * Math.PI / period)} `;
                 for (let i = 0; i <= width; i += 5) {
-                    const x = i;
-                    const y = yOffset + amp * Math.cos((i / width) * Math.PI * 2 + offset);
-                    pathD += `L ${x} ${y} `;
+                    const h = (i / width) * 24; 
+                    const y = yOffset - amp * Math.cos((h - peakHour) * 2 * Math.PI / period); // Minus amp because Y goes down in SVG
+                    pathD += `L ${i} ${y} `;
                 }
 
                 const now = new Date();
                 const currentHour = now.getHours() + (now.getMinutes() / 60);
                 const xPos = (currentHour / 24) * width;
-                const currentY = yOffset + amp * Math.cos((currentHour / 24) * Math.PI * 2 + offset);
+                const currentY = yOffset - amp * Math.cos((currentHour - peakHour) * 2 * Math.PI / period);
                 
-                // Derivative of cos(x) is -sin(x). If slope is negative, Y is decreasing (going UP visually on screen).
-                const slope = -Math.sin((currentHour / 24) * Math.PI * 2 + offset);
-                const isRising = slope < 0; 
+                // Derivative of -cos(x) is sin(x). Positive slope means Y is increasing (going down visually).
+                // Rising tide means Y is decreasing visually.
+                // Formula: height = base + amp * cos(...)
+                // Derivative of height w.r.t time: -amp * sin(...)
+                const slope = -Math.sin((currentHour - peakHour) * 2 * Math.PI / period);
+                const isRising = slope > 0; 
+                
                 const statusColor = isRising ? '#10b981' : '#ef4444'; 
+                const statusText = isRising ? '▲ Tide is Rising' : '▼ Tide is Falling';
+                
+                document.getElementById('tide-status').innerText = statusText;
+                document.getElementById('tide-status').style.color = statusColor;
 
                 document.getElementById('tide-graph-wrapper').innerHTML = `
-                    <svg viewBox="0 0 1000 180" class="w-full h-full absolute inset-0 overflow-visible" preserveAspectRatio="none">
-                        <!-- Horizontal Grid Lines (subtle) -->
-                        <line x1="0" y1="50" x2="1000" y2="50" stroke="#27272a" stroke-width="1" stroke-dasharray="4,4" />
-                        <line x1="0" y1="130" x2="1000" y2="130" stroke="#27272a" stroke-width="1" stroke-dasharray="4,4" />
+                    <svg viewBox="0 0 1000 180" class="w-full h-full absolute inset-0 overflow-hidden" preserveAspectRatio="none">
                         
                         <!-- The Wave -->
-                        <path class="tide-wave" d="${pathD}" />
+                        <path d="${pathD}" fill="none" stroke="var(--accent)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
                         
-                        <!-- Current Time Marker -->
-                        <line x1="${xPos}" y1="0" x2="${xPos}" y2="180" stroke="${statusColor}" stroke-width="2" stroke-dasharray="6,6" opacity="0.7"/>
-                        <circle cx="${xPos}" cy="${currentY}" r="8" fill="${statusColor}" />
+                        <!-- Current Time Marker (Dashed Line) -->
+                        <line x1="${xPos}" y1="0" x2="${xPos}" y2="${currentY}" stroke="${statusColor}" stroke-width="2" stroke-dasharray="8,8" opacity="0.8"/>
+                        
+                        <!-- Centered Axis Line & Ticks (Bottom) -->
+                        <line x1="0" y1="160" x2="1000" y2="160" stroke="#27272a" stroke-width="2" />
+                        
+                        <line x1="0" y1="160" x2="0" y2="168" stroke="#27272a" stroke-width="2" />
+                        <text x="5" y="176" fill="#71717a" font-size="14" font-weight="bold" text-anchor="start">00:00</text>
+                        
+                        <line x1="250" y1="160" x2="250" y2="168" stroke="#27272a" stroke-width="2" />
+                        <text x="250" y="176" fill="#71717a" font-size="14" font-weight="bold" text-anchor="middle">06:00</text>
+                        
+                        <line x1="500" y1="160" x2="500" y2="168" stroke="#27272a" stroke-width="2" />
+                        <text x="500" y="176" fill="#71717a" font-size="14" font-weight="bold" text-anchor="middle">12:00</text>
+                        
+                        <line x1="750" y1="160" x2="750" y2="168" stroke="#27272a" stroke-width="2" />
+                        <text x="750" y="176" fill="#71717a" font-size="14" font-weight="bold" text-anchor="middle">18:00</text>
                     </svg>
                 `;
                 
-                document.getElementById('tide-high-text').innerText = currentLoc === 'dg' ? '▲ High: 05:04 PM' : '▲ High: 06:10 PM';
-                document.getElementById('tide-low-text').innerText = currentLoc === 'dg' ? '▼ Low: 10:22 AM' : '▼ Low: 11:30 AM';
+                document.getElementById('tide-high-text').innerText = currentLoc === 'dg' ? '▲ High: 05:06 PM' : '▲ High: 06:10 PM';
+                document.getElementById('tide-low-text').innerText = currentLoc === 'dg' ? '▼ Low: 10:21 AM' : '▼ Low: 11:30 AM';
 
             } catch(e) { 
-                document.getElementById('w-stats-box').innerHTML = "<div class='text-red-500 py-4 text-sm'>Error</div>"; 
+                document.getElementById('w-stats-box').innerHTML = "<div class='text-red-500 py-4 text-sm'>Forecast Error</div>"; 
             }
         }
 
@@ -427,7 +436,7 @@
             const newsEl = document.getElementById('news-content');
             
             try {
-                const fetchWithTimeout = (url, timeout = 8000) => Promise.race([
+                const fetchWithTimeout = (url, timeout = 10000) => Promise.race([
                     fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(url)}`).then(r => r.json()),
                     new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), timeout))
                 ]);
@@ -448,11 +457,11 @@
                     let brandClass = 'bg-zinc-800 text-white'; 
                     if (link.includes('cnn.com') || link.includes('cnn')) { brandClass = 'bg-red-600 text-white'; }
                     else if (link.includes('bbc')) { brandClass = 'bg-yellow-400 text-black'; }
-                    else if (link.includes('rte')) { brandClass = 'bg-sky-500 text-white'; }
-                    else if (link.includes('thejournal')) { brandClass = 'bg-blue-900 text-white'; }
+                    else if (link.includes('rte')) { brandClass = 'bg-blue-600 text-white'; }
+                    else if (link.includes('thejournal')) { brandClass = 'bg-indigo-900 text-white'; }
                     else if (link.includes('guardian')) { brandClass = 'bg-blue-800 text-white'; }
 
-                    // Extract image from RSS enclosure or thumbnail
+                    // Extract image from RSS enclosure or media:thumbnail
                     let imgUrl = i.enclosure?.link || i.thumbnail || '';
                     if(!imgUrl && i.content) {
                         const imgMatch = i.content.match(/<img[^>]+src="([^">]+)"/);
@@ -460,8 +469,8 @@
                     }
 
                     const imgHtml = imgUrl ? 
-                        `<img src='${imgUrl}' class='w-20 h-20 rounded-lg object-cover flex-shrink-0 border border-zinc-800' onerror="this.style.display='none'">` : 
-                        `<div class='w-20 h-20 rounded-lg bg-zinc-800 flex-shrink-0 flex items-center justify-center border border-zinc-700'><svg class="w-8 h-8 text-zinc-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"></path></svg></div>`;
+                        `<img src='${imgUrl}' class='w-[90px] h-[90px] rounded-xl object-cover flex-shrink-0 border border-zinc-800' onerror="this.src='https://placehold.co/90x90/18181b/52525b?text=News'">` : 
+                        `<div class='w-[90px] h-[90px] rounded-xl bg-zinc-800 flex-shrink-0 flex items-center justify-center border border-zinc-700'><svg class="w-8 h-8 text-zinc-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"></path></svg></div>`;
                     
                     return `
                         <a href="${i.link}" target="_blank" class='block bg-zinc-900 p-3 rounded-2xl border border-zinc-800 shadow-sm hover:bg-zinc-800/50 transition-colors'>
@@ -485,13 +494,11 @@
             const watchEl = document.getElementById('watch-content');
             
             try {
+                // Batching requests to avoid API dropping connections
                 const fetchChan = async (ch) => {
-                    const controller = new AbortController();
-                    const timeoutId = setTimeout(() => controller.abort(), 8000);
                     try {
-                        const res = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=https://www.youtube.com/feeds/videos.xml?channel_id=${ch.id}`, { signal: controller.signal });
+                        const res = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=https://www.youtube.com/feeds/videos.xml?channel_id=${ch.id}`);
                         const data = await res.json();
-                        clearTimeout(timeoutId);
                         return (data.items || []).map(v => ({ ...v, author: ch.name }));
                     } catch(e) {
                         return []; 
@@ -522,7 +529,7 @@
                     </a>`;
                 }).join('');
             } catch(e) { 
-                watchEl.innerHTML = "<div class='text-center py-10 text-red-500'>Video sync failed. Please check network.</div>"; 
+                watchEl.innerHTML = "<div class='text-center py-10 text-red-500'>Video sync failed. API rate limit possibly reached.</div>"; 
             }
         }
 
